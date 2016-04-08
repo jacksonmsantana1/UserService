@@ -11,8 +11,6 @@ const beforeEach = lab.beforeEach;
 const afterEach = lab.afterEach;
 
 const server = require('../server.js');
-const request = require('request');
-const user = require('../user.json');
 
 describe('User', () => {
 
@@ -115,7 +113,7 @@ describe('User', () => {
 
     });
 
-    it('Should return the user object', (done) => {
+    it('Should return the user object, also include token, without the password', (done) => {
       let options = {
         method: 'GET',
         url: '/user/1234567890',
@@ -125,9 +123,12 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-        let result = response.result;
+        let user = response.result;
 
         expect(response.statusCode).to.be.equal(200);
+        expect(!!response.headers.authorization).to.be.equal(true);
+        expect(user.id).to.be.equal('1234567890');
+        expect(user.password).to.be.equal(undefined);
         done();
       });
     });

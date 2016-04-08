@@ -1,10 +1,10 @@
-let R = require('ramda');
-let Boom = require('boom');
-let privateKey = 'dsakf34CONOUNAclOCUICObl3292weas34gbsLJ32f';
+const curry = require('ramda').curry;
+const Boom = require('boom');
 
-let validate = (request, decodedToken, callback) => {
-  let error = Boom.badRequest('Invalid Token - ID value doesnt exist');;
-  let credentials = decodedToken || {};
+const validate = (request, decodedToken, callback) => {
+  const error = Boom.badRequest('Invalid Token - ID value doesnt exist');
+  const credentials = decodedToken || {};
+
   if (!credentials.id) {
     return callback(error, false, credentials);
   }
@@ -12,9 +12,10 @@ let validate = (request, decodedToken, callback) => {
   return callback(null, true, credentials);
 };
 
-let Auth = R.curry((server, error) => {
+/*eslint no-unused-vars:1*/
+const Auth = curry((server, error) => {
   server.auth.strategy('token', 'jwt', {
-    key: privateKey,
+    key: require('../../../privateKey.js'),
     validateFunc: validate,
     verifyOptions: {
       algorithms: ['HS256'],

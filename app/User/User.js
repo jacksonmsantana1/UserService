@@ -1,7 +1,7 @@
 const Boom = require('boom');
 
 // MOCK
-const getUser = (id) => {
+const getUserById = (id) => {
   if (id === '1234567890') {
     return Promise.resolve({
       id: '1234567890',
@@ -14,6 +14,4 @@ const getUser = (id) => {
   return Promise.reject(Boom.badRequest('Inexistent ID'));
 };
 
-module.exports = {
-  getUser: getUser,
-};
+module.exports = { getUser: getUserById };
