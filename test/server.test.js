@@ -13,33 +13,33 @@ const afterEach = lab.afterEach;
 const server = require('../server.js');
 
 describe('User', () => {
+  let privateKey = 'dsakf34CONOUNAclOCUICObl3292weas34gbsLJ32f';
+
+  let tokenHeader = (userId, options) => {
+    options = options || {};
+
+    return 'Bearer ' + Jwt.sign({
+      id: userId,
+    }, privateKey, options);
+  };
+
+  let invalidTokenHeader = (userId, options) => {
+    options = options || {};
+
+    return 'Bearer ' + Jwt.sign({
+      anus: userId,
+    }, privateKey, options);
+  };
+
+  let invalidTokenKey = (userId, options) => {
+    options = options || {};
+
+    return 'Bearer ' + Jwt.sign({
+      anus: userId,
+    }, 'invalid private key', options);
+  };
 
   describe('/user/{id}', () => {
-    let privateKey = 'dsakf34CONOUNAclOCUICObl3292weas34gbsLJ32f';
-
-    let tokenHeader = (userId, options) => {
-      options = options || {};
-
-      return 'Bearer ' + Jwt.sign({
-        id: userId,
-      }, privateKey, options);
-    };
-
-    let invalidTokenHeader = (userId, options) => {
-      options = options || {};
-
-      return 'Bearer ' + Jwt.sign({
-        anus: userId,
-      }, privateKey, options);
-    };
-
-    let invalidTokenKey = (userId, options) => {
-      options = options || {};
-
-      return 'Bearer ' + Jwt.sign({
-        anus: userId,
-      }, 'invalid private key', options);
-    };
 
     it('Should return an error if the request doesn t contain a token', (done) => {
       let options = {
@@ -151,33 +151,8 @@ describe('User', () => {
   });
 
   describe('/user/projects', () => {
-    let privateKey = 'dsakf34CONOUNAclOCUICObl3292weas34gbsLJ32f';
 
-    let tokenHeader = (userId, options) => {
-      options = options || {};
-
-      return 'Bearer ' + Jwt.sign({
-        id: userId,
-      }, privateKey, options);
-    };
-
-    let invalidTokenHeader = (userId, options) => {
-      options = options || {};
-
-      return 'Bearer ' + Jwt.sign({
-        anus: userId,
-      }, privateKey, options);
-    };
-
-    let invalidTokenKey = (userId, options) => {
-      options = options || {};
-
-      return 'Bearer ' + Jwt.sign({
-        anus: userId,
-      }, 'invalid private key', options);
-    };
-
-    it('Should be listing to this endpoint', (done) => {
+    it('Should be listening to this endpoint', (done) => {
       let options = {
         method: 'GET',
         url: '/user/projects',
@@ -190,7 +165,6 @@ describe('User', () => {
         expect(response.statusCode).to.be.equal(200);
         done();
       });
-
     });
 
     it('Should return an error if it s missing authentication', (done) => {
@@ -273,6 +247,29 @@ describe('User', () => {
         expect(projects.liked).to.be.an('array');
         expect(projects.doneProjects).to.be.an('array');
         expect(projects.inProgressProjects).to.be.an('array');
+        done();
+      });
+    });
+  });
+
+  describe('/user/projects/pinned', () => {
+    it('Should be listening for a POST request to this endpoint', (done) => {
+      let options = {
+        method: 'POST',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          id: '1234567890',
+          projectId: '12345',
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.method).to.be.equal('POST');
+        expect(response.url).to.be.equal('/user/projects/pinned');
+        expect(response.statusCode).to.be.equal(200);
         done();
       });
     });

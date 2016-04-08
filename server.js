@@ -24,6 +24,13 @@ server.route([{
     auth: 'token',
   },
   handler: require('./app/handlers/GET/user/projects/'),
+}, {
+  method: 'POST',
+  path: '/user/projects/pinned',
+  config: {
+    auth: 'token',
+  },
+  handler: require('./app/handlers/POST/user/projects/pinned/'),
 },
 ]);
 
