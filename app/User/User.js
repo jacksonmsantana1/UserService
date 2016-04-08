@@ -8,6 +8,12 @@ const getUserById = (id) => {
       email: 'jackson@gmail.com',
       password: '1234',
       validToken: '',
+      projects: {
+        pinned: [],
+        liked: [],
+        doneProjects: [],
+        inProgressProjects: [],
+      },
     });
   }
 

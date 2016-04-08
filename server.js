@@ -10,14 +10,22 @@ server.connection({
 
 server.register(require('hapi-auth-jwt'), Auth(server));
 
-server.route({
+server.route([{
   method: 'GET',
   path: '/user/{id}',
   config: {
     auth: 'token',
   },
   handler: require('./app/handlers/GET/user/{id}/'),
-});
+}, {
+  method: 'GET',
+  path: '/user/projects',
+  config: {
+    auth: 'token',
+  },
+  handler: require('./app/handlers/GET/user/projects/'),
+},
+]);
 
 /**********************************Start***********************************/
 

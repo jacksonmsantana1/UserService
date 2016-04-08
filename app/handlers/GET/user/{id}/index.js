@@ -21,8 +21,8 @@ const isAuthenticated = (request) => {
 const getUser = User.getUser;
 
 // compareId :: String -> User -> Promise(User, Error(Unauthorized))
-const compareId = R.curry((id, user) => (id === user.id) ? Promise.resolve(user) :
-    Promise.reject(Boom.unauthorized('Invalid ID: ' + id)));
+const compareId = R.curry((id, user) => ((id === user.id) ? Promise.resolve(user) :
+    Promise.reject(Boom.unauthorized('Invalid ID: ' + id))));
 
 // deleteUserPws :: User -> Promise(User)
 const deleteUserPws = (user) => {
