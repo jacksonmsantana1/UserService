@@ -1,8 +1,8 @@
 const curry = require('ramda').curry;
+const get = require('ramda').prop;
 const Boom = require('boom');
-
-// getUser :: String -> Promise(User, Error)
-const getUser = require('../../../../User/User.js').getUser;
+const jwt = require('jsonwebtoken');
+const key = require('../../../../../privateKey.js');
 
 // isAutheticated :: Request -> Promise(ID, Error)
 const isAuthenticated = (request, credentials) => {
@@ -14,13 +14,33 @@ const isAuthenticated = (request, credentials) => {
   return Promise.error(Boom.badImplementation('Invalid Request Object'));
 };
 
-// sendProjects :: User -> Response(User, Error)
-const sendProjects = curry((reply, user) => {
-  if (!!user && !!user.projects) {
-    reply(user.projects);
+// getUser :: String -> Promise(User, Error)
+const getUser = require('../../../../User/User.js').getUser;
+
+// signNewToken :: User -> Token
+const signNewToken = (uid) => {
+  const tk = '' + jwt.sign({
+      id: uid,
+    },
+    key, {
+      algorithm: 'HS256',
+    });
+  return tk;
+};
+
+// setAuthorizationHeader :: Function -> User -> Promise(Projects)
+const setAuthorizationHeader = curry((reply, credentials, projects) => {
+  reply(projects).header('authorization', signNewToken(credentials));
+  return Promise.resolve(projects);
+});
+
+// sendProjects :: User -> Response(Projects, Error)
+const sendProjects = curry((reply, projects) => {
+  if (!!projects) {
+    reply(projects);
   }
 
-  reply(Boom.badImplementation('Invalid User Retreived'));
+  reply(Boom.badImplementation('Invalid User Projects'));
 });
 
 // sendError :: Response -> Error -> Response(Error)
@@ -33,6 +53,8 @@ module.exports = (request, reply) => {
 
   isAuthenticated(request, credentials)
     .then(getUser)
+    .then(get('projects'))
+    .then(setAuthorizationHeader(reply, credentials))
     .then(sendProjects(reply))
     .catch(sendError(reply));
 };

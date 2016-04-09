@@ -3,6 +3,8 @@ const curry = require('ramda').curry;
 const compose = require('ramda').compose;
 const contain = require('ramda').contains;
 const get = require('ramda').prop;
+const jwt = require('jsonwebtoken');
+const key = require('../../../../../../privateKey.js');
 
 // isAutheticated :: Request -> Promise(Payload, Error)
 const isAuthenticated = (request) => {
@@ -15,20 +17,13 @@ const isAuthenticated = (request) => {
 };
 
 // checkPayload :: Payload -> Promise(String:ID, Error)
-const checkPayload = (payload) => {
+const checkPayload = curry((uid, payload) => {
   if (!(!!payload && !!payload.projectId)) {
     return Promise.reject(Boom.badRequest('Missing the Project s ID'));
-  } else if (!(!!payload && !!payload.id)) {
-    return Promise.reject(Boom.badRequest('Missing the User s ID'));
   }
 
-  return Promise.resolve(payload.id);
-};
-
-// checkUserId :: String:Credentials -> String:ID -> Promise(String:Credentials, Error)
-const checkUserId = curry((credentials, id) => ((credentials === id) ?
-  Promise.resolve(credentials) :
-  Promise.reject(Boom.badRequest('User ID invalid'))));
+  return Promise.resolve(uid);
+});
 
 // getUser :: String:Credentials -> Promise(User, Error)
 const getUser = require('../../../../../User/User.js').getUser;
@@ -38,8 +33,8 @@ const getProjectsPinned = compose(get('pinned'), get('projects'));
 
 // containProject :: String -> [Project] -> Promise(String, Error)
 const containProject = curry((pId, arr) => (contain(pId, arr) ?
-    Promise.reject(Boom.badRequest('Project already pinned')) :
-    Promise.resolve(pId)));
+  Promise.reject(Boom.badRequest('Project already pinned')) :
+  Promise.resolve(pId)));
 
 // getProjectFromDB :: String -> Promise(Project, Error)
 const getProjectFromDB = require('../../../../../plugins/Project')
@@ -48,9 +43,26 @@ const getProjectFromDB = require('../../../../../plugins/Project')
 // saveProjectPinned :: String -> Promise(String, Error)
 const saveProjectPinned = require('../../../../../User/User.js').saveProjectPinned;
 
+// signNewToken :: User -> Token
+const signNewToken = (uid) => {
+  const tk = '' + jwt.sign({
+      id: uid,
+    },
+    key, {
+      algorithm: 'HS256',
+    });
+  return tk;
+};
+
+// setAuthorizationHeader :: Function -> User -> Promise(String)
+const setAuthorizationHeader = curry((reply, uid, pId) => {
+  reply(pId).header('authorization', signNewToken(uid));
+  return Promise.resolve(pId);
+});
+
 // sendResponse :: _ -> Response(200)
-const sendResponse = curry((reply, projectId) => {
-  reply(projectId);
+const sendResponse = curry((reply, pId) => {
+  reply(pId);
 });
 
 // sendError :: Error -> Response(Error)
@@ -63,13 +75,13 @@ module.exports = (request, reply) => {
   const credentials = request.auth.credentials.id;
 
   isAuthenticated(request)
-    .then(checkPayload)
-    .then(checkUserId(credentials))
+    .then(checkPayload(credentials))
     .then(getUser)
     .then(getProjectsPinned)
     .then(containProject(projectId))
     .then(getProjectFromDB)
     .then(saveProjectPinned)
+    .then(setAuthorizationHeader(reply, credentials))
     .then(sendResponse(reply))
     .catch(sendError(reply));
 };
