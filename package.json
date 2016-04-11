@@ -41,6 +41,7 @@
     "hapi-mongodb": "^6.0.0",
     "joi": "^5.1.0",
     "jsonwebtoken": "^5.7.0",
+    "mongodb": "^2.1.16",
     "ramda": "^0.20.1",
     "request": "^2.69.0",
     "uuid": "^2.0.1"
