@@ -310,6 +310,26 @@ describe('User', () => {
       });
     });
 
+    it('Should return an error if the token s id doenst exists', (done) => {
+      let options = {
+        method: 'POST',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: tokenHeader('123456789'),
+        },
+        payload: {
+          projectId: '123456',
+        },
+      };
+      let strError = 'Inexistent ID';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
     it('Should be listening for a POST request to this endpoint', (done) => {
       let options = {
         method: 'POST',
@@ -318,7 +338,7 @@ describe('User', () => {
           authorization: tokenHeader('1234567890'),
         },
         payload: {
-          projectId: '1234567890',
+          projectId: '123456',
         },
       };
 
@@ -327,8 +347,6 @@ describe('User', () => {
 
         expect(res.method).to.be.equal('POST');
         expect(res.url).to.be.equal('/user/projects/pinned');
-        expect(response.statusCode).to.be.equal(200);
-        expect(!!response.headers.authorization).to.be.equal(true);
         done();
       });
     });
@@ -340,8 +358,7 @@ describe('User', () => {
         headers: {
           authorization: tokenHeader('1234567890'),
         },
-        payload: {
-        },
+        payload: {},
       };
 
       server.inject(options, (response) => {
@@ -397,16 +414,208 @@ describe('User', () => {
           authorization: tokenHeader('1234567890'),
         },
         payload: {
-          projectId: '1234567890',
+          projectId: '123456',
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(200);
+        expect(response.result).to.be.equal('123456');
+        done();
+      });
+    });
+
+    it('Should return an authorization header if the request suceeds', (done) => {
+      let options = {
+        method: 'POST',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          projectId: '123456',
         },
       };
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(200);
         expect(!!response.headers.authorization).to.be.equal(true);
-        expect(response.result).to.be.equal('1234567890');
+        expect(response.result).to.be.equal('123456');
         done();
       });
+    });
+  });
+
+  describe('/user/projects/desPinned', () => {
+    it('Should be listenning to this endpoint', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          projectId: '1234567890',
+        },
+      };
+
+      server.inject(options, (response) => {
+        let res = response.raw.req;
+
+        expect(res.method).to.be.equal('PUT');
+        expect(res.url).to.be.equal('/user/projects/desPinned');
+        done();
+      });
+    });
+
+    it('Should return an error if it s missing authentication', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal('Missing authentication');
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesn t contain the id value', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: invalidTokenHeader('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        let result = response.result;
+
+        expect(response.statusCode).to.be.equal(400);
+        expect(JSON.parse(response.payload).message)
+          .to.be.equal('Invalid Token - ID value doesnt exist');
+        done();
+      });
+    });
+
+    it('Should return an error if token isn t valid', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: invalidTokenKey('1234567890'),
+        },
+      };
+      let strError = 'Invalid signature received for JSON Web Token validation';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should contain in the request the Project s ID', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {},
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('Missing the Project s ID');
+        done();
+      });
+    });
+
+    it('Should return an error if the project don t exist', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          projectId: 'DONT EXIST',
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('Project doesn t exist');
+        done();
+      });
+    });
+
+    it('Should return an error if the user`s id doenst exists', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('123456789'),
+        },
+        payload: {
+          projectId: '12345',
+        },
+      };
+      let strError = 'Inexistent ID';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the project isnt pinned', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          projectId: '123456',
+        },
+      };
+      let strError = 'Can t despin this project';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an authorization header if the request suceeds', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          projectId: '12345',
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(200);
+        expect(!!response.headers.authorization).to.be.equal(true);
+        done();
+      });
+    });
+
+    it('Should update the user information - TODO!!!!!', (done) => {
+      //TODO
+      expect(true).to.be.true;
+      done();
     });
   });
 });

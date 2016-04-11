@@ -9,7 +9,7 @@ const getUserById = (id) => {
       password: '1234',
       validToken: '',
       projects: {
-        pinned: ['12345'],
+        pinned: ['12345', '123456789'],
         liked: [],
         doneProjects: [],
         inProgressProjects: [],
@@ -21,16 +21,25 @@ const getUserById = (id) => {
 };
 
 // MOCK
-// saveProjectPinned :: Project -> Promise(String, Error)
-const savePP = (project) => {
-  if (project.id === '123') {
-    return Promise.reject(Boom.badImplementation('terrible implementation'));
+const _saveUser = (user) => {
+  if (user.id === '1234567890') {
+    return Promise.resolve(user);
   }
 
-  return Promise.resolve(project.id);
+  return Promise.reject(Boom.badImplementation('Something Occured'));
+};
+
+//MOCK
+const _updateUser = (user) => {
+  if (user.id === '1234567890') {
+    return Promise.resolve(user);
+  }
+
+  return Promise.reject(Boom.badImplementation('Something Occured'));
 };
 
 module.exports = {
   getUser: getUserById,
-  saveProjectPinned: savePP,
+  saveUser: _saveUser,
+  updateUser: _updateUser,
 };

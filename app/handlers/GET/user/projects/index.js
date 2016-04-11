@@ -18,15 +18,7 @@ const isAuthenticated = (request, credentials) => {
 const getUser = require('../../../../User/User.js').getUser;
 
 // signNewToken :: User -> Token
-const signNewToken = (uid) => {
-  const tk = '' + jwt.sign({
-      id: uid,
-    },
-    key, {
-      algorithm: 'HS256',
-    });
-  return tk;
-};
+const signNewToken = (uid) => jwt.sign({ id: uid }, key, { algorithm: 'HS256' });
 
 // setAuthorizationHeader :: Function -> User -> Promise(Projects)
 const setAuthorizationHeader = curry((reply, credentials, projects) => {
