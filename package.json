@@ -38,6 +38,8 @@
     "good-file": "^5.1.2",
     "hapi": "^13.3.0",
     "hapi-auth-jwt": "^4.0.0",
+    "hapi-mongodb": "^6.0.0",
+    "joi": "^5.1.0",
     "jsonwebtoken": "^5.7.0",
     "ramda": "^0.20.1",
     "request": "^2.69.0",

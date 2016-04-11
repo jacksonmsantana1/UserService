@@ -8,7 +8,18 @@ server.connection({
   port: 3000,
 });
 
+/*********************************Plugins**********************************/
+
+//Auth
 server.register(require('hapi-auth-jwt'), Auth(server));
+
+//MongoDB
+const MongoDB = server.register({
+  register: require('hapi-mongodb'),
+  options: require('./app/plugins/mongodb/config.js').opts,
+});
+
+/**************************Routing************************************/
 
 server.route([{
   method: 'GET',
@@ -16,7 +27,7 @@ server.route([{
   config: {
     auth: 'token',
   },
-  handler: require('./app/handlers/GET/user/{id}/'),
+  handler: require('./app/handlers/GET/user/id/'),
 }, {
   method: 'GET',
   path: '/user/projects',
@@ -43,10 +54,17 @@ server.route([{
 
 /**********************************Start***********************************/
 
-server.start((err) => {
+const startServer = (err) => {
   if (err) {
     throw err;
   }
 
-  console.log('Server running at:', server.info.uri);
-});
+  console.log('MongoDB running...');
+  server.start();
+};
+
+MongoDB
+  .then(startServer)
+  .then((err) => {
+    console.log('Server running...');
+  });

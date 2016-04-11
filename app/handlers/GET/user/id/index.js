@@ -33,15 +33,7 @@ const deleteUserPws = (user) => {
 };
 
 // signNewToken :: User -> Token
-const signNewToken = (user) => {
-  const tk = '' + jwt.sign({
-    id: user.id,
-  },
-    key, {
-      algorithm: 'HS256',
-    });
-  return tk;
-};
+const signNewToken = (user) => jwt.sign({ id: user.id }, key, { algorithm: 'HS256' });
 
 // setAuthorizationHeader :: Function -> User -> Promise(User)
 const setAuthorizationHeader = R.curry((reply, user) => {
