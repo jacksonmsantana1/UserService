@@ -1,6 +1,6 @@
 module.exports = {
   opts: {
-    url: 'mongodb://test:test@ds011429.mlab.com:11429/user',
+    url: 'mongodb://127.0.0.1:27017/test',
     settings: {
       db: {
         nativeParser: false,

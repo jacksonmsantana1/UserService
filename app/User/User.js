@@ -1,45 +1,75 @@
 const Boom = require('boom');
+const Joi = require('joi');
+const curry = require('ramda').curry;
+const UserSchema = require('./UserModel.js');
 
-// MOCK
-const getUserById = (id) => {
-  if (id === '1234567890') {
-    return Promise.resolve({
-      id: '1234567890',
-      email: 'jackson@gmail.com',
-      password: '1234',
-      validToken: '',
-      projects: {
-        pinned: ['12345', '123456789'],
-        liked: [],
-        doneProjects: [],
-        inProgressProjects: [],
-      },
+// _getUser :: Collection:db -> String:uid -> Promise(User, Error)
+const _getUser = curry((db, uid) => new Promise((resolve, reject) => {
+  if (db.collectionName !== 'users') {
+    reject(
+        Boom.badImplementation('Trying to access an invalid collection: ' + db.collectionName));
+  } else if (!uid) {
+    reject(Boom.badRequest('Inexistent ID'));
+  }
+
+  db.find({ id: uid })
+   .each((error, doc) => {
+     if (!!doc && doc !== null) {
+       resolve(doc);
+     } else if (!doc && !error) {
+       reject(Boom.badRequest('Inexistent User'));
+     }
+
+     reject(Boom.badRequest('MongoDB Server Error'));
+   });
+}));
+
+// _saveUser :: Collection:db -> User:user -> Promise(User, Error)
+const _saveUser = curry((db, user) =>
+  new Promise((resolve, reject) => {
+    if (db.collectionName !== 'users') {
+      reject(Boom.badImplementation(
+        'Trying to access an invalid collection: ' + db.collectionName));
+    }
+
+    Joi.validate(user, UserSchema, (err, value) => {
+      if (err) {
+        reject(Boom.badRequest('Schema Validation Error'));
+      }
+
+      db.insert(value)
+        .then((res) => resolve(res.ops[0]))
+        .catch(() => reject(Boom.badImplementation('MongoDB Server Error')));
     });
-  }
+  }));
 
-  return Promise.reject(Boom.badRequest('Inexistent ID'));
-};
+// _replaceUser :: Collection:db -> String:userId -> User:newUser -> Promise(User, Error)
+const _replaceUser = curry((db, userId, newUser) =>
+  new Promise((resolve, reject) => {
+    if (db.collectionName !== 'users') {
+      reject(Boom.badImplementation(
+        'Trying to access an invalid collection: ' + db.collectionName));
+    } else if (!userId) {
+      reject(Boom.badRequest('Invalid ID'));
+    }
 
-// MOCK
-const _saveUser = (user) => {
-  if (user.id === '1234567890') {
-    return Promise.resolve(user);
-  }
+    Joi.validate(newUser, UserSchema, (ValidateErr, value) => {
+      if (ValidateErr) {
+        reject(Boom.badRequest('Schema Validation Error'));
+      }
 
-  return Promise.reject(Boom.badImplementation('Something Occured'));
-};
+      db.replaceOne({ id: userId }, value, (mongoErr, user) => {
+        if (mongoErr) {
+          reject(Boom.badRequest('MongoDB Server Error'));
+        }
 
-//MOCK
-const _updateUser = (user) => {
-  if (user.id === '1234567890') {
-    return Promise.resolve(user);
-  }
-
-  return Promise.reject(Boom.badImplementation('Something Occured'));
-};
+        resolve(user);
+      });
+    });
+  }));
 
 module.exports = {
-  getUser: getUserById,
+  getUser: _getUser,
   saveUser: _saveUser,
-  updateUser: _updateUser,
+  replaceUser: _replaceUser,
 };

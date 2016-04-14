@@ -33,7 +33,7 @@ const checkPayload = (payload) => {
 // isProjectValid :: String:projectId -> Promise(String:projectId, Error)
 const isProjectValid = require('../../../../../plugins/Project/').isValid;
 
-// getUser :: String:credential -> Promise(User, Error)
+// getUser :: Collection:db -> String:credential -> Promise(User, Error)
 const getUser = require('../../../../../User/User.js').getUser;
 
 // setPinnedProjects :: String:projectId -> User: user -> User: user
@@ -58,13 +58,13 @@ const isPinned = curry((projectId, user) => {
     Promise.reject(Boom.badRequest('Can t despin this project'));
 });
 
-// setUser :: String:credential -> String:projectId -> User
-const setUser = curry((credential, projectId) => getUser(credential)
+// setUser :: Collection:db String:credential -> String:projectId -> User
+const setUser = curry((db, credential, projectId) => getUser(db, credential)
     .then(isPinned(projectId))
     .then(setPinnedProjects(projectId)));
 
-// updateUser :: User -> Promise(User, Error)
-const updateUser = require('../../../../../User/User.js').updateUser;
+// replaceUser :: Collection:db -> String:uid -> User:newUser -> Promise(User, Error)
+const replaceUser = require('../../../../../User/User.js').replaceUser;
 
 // signNewToken :: String:credential -> Token
 const signNewToken = (credential) => jwt.sign({ id: credential }, key, { algorithm: 'HS256' });
@@ -83,12 +83,14 @@ const sendError = curry((reply, err) => {
 module.exports = (request, reply) => {
   const credential = request.auth.credentials.id;
   const projectId = request.payload.projectId;
+  const db = request.server.plugins['hapi-mongodb'].db;
+  const collection = db.collection('users');
 
   isAuthenticated(request)
     .then(checkPayload)
     .then(isProjectValid)
-    .then(setUser(credential))
-    .then(updateUser)
+    .then(setUser(collection, credential))
+    .then(replaceUser(collection, credential))
     .then(sendResponse(reply, projectId))
     .catch(sendError(reply));
 };

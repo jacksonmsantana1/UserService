@@ -6,7 +6,7 @@ const key = require('../../../../../privateKey.js');
 
 /**************************Pure Functions**********************************/
 
-// isAutheticated :: Request -> Promise(ID, Error)
+// isAutheticated :: Request -> Promise(String:paramsId, Error)
 const isAuthenticated = (request) => {
   if (!!request && !!request.auth && !!request.params) {
     return request.auth.isAuthenticated ? Promise.resolve(request.params.id) :
@@ -17,12 +17,14 @@ const isAuthenticated = (request) => {
 };
 /*eslint arrow-body-style:1*/
 
-// getUser :: String -> Promise(User, Error(BadRequest))
-const getUser = User.getUser;
+// compareId :: String:credential -> String:paramsId -> Promise(credential, Error(Unauthorized))
+const compareId = R.curry((credential, paramsId) =>
+                          ((credential === paramsId) ?
+                           Promise.resolve(credential) :
+                            Promise.reject(Boom.unauthorized('Invalid ID: ' + paramsId))));
 
-// compareId :: String -> User -> Promise(User, Error(Unauthorized))
-const compareId = R.curry((id, user) => ((id === user.id) ? Promise.resolve(user) :
-    Promise.reject(Boom.unauthorized('Invalid ID: ' + id))));
+// getUser :: Collection:db -> String:credential -> Promise(User, Error(BadRequest))
+const getUser = User.getUser;
 
 // deleteUserPws :: User -> Promise(User)
 const deleteUserPws = (user) => {
@@ -33,16 +35,15 @@ const deleteUserPws = (user) => {
 };
 
 // signNewToken :: User -> Token
-const signNewToken = (user) => jwt.sign({ id: user.id }, key, { algorithm: 'HS256' });
-
-// setAuthorizationHeader :: Function -> User -> Promise(User)
-const setAuthorizationHeader = R.curry((reply, user) => {
-  reply(user).header('authorization', signNewToken(user));
-  return Promise.resolve(user);
+const signNewToken = (user) => jwt.sign({
+  id: user.id,
+}, key, {
+  algorithm: 'HS256',
 });
 
 // sendUser :: Function -> User -> _
 const sendUser = R.curry((reply, user) => {
+  reply(user).header('authorization', signNewToken(user));
   reply(user);
 });
 
@@ -54,13 +55,14 @@ const sendError = R.curry((reply, err) => {
 /****************************Impure Functions****************************/
 
 module.exports = (request, reply) => {
-  const credentials = request.auth.credentials.id;
+  const credential = request.auth.credentials.id;
+  const db = request.server.plugins['hapi-mongodb'].db;
+  const collection = db.collection('users');
 
   isAuthenticated(request)
-    .then(getUser)
-    .then(compareId(credentials))
+    .then(compareId(credential))
+    .then(getUser(collection))
     .then(deleteUserPws)
-    .then(setAuthorizationHeader(reply))
     .then(sendUser(reply))
     .catch(sendError(reply));
 };

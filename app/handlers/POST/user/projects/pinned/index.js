@@ -26,7 +26,7 @@ const checkPayload = curry((payload) => {
 // isProjectValid :: String:projectId -> Promise(String:projectId, Error)
 const isProjectValid = require('../../../../../plugins/Project/').isValid;
 
-// getUser :: String:credential -> Promise(User, Error)
+// getUser :: Collection:db -> String:credential -> Promise(User, Error)
 const getUser = require('../../../../../User/User.js').getUser;
 
 // clone :: User -> User
@@ -52,14 +52,13 @@ const addPinnedProject = curry((projectId, user) => {
 });
 
 // saveUser :: User -> Promise(User, Error)
-const saveUser = require('../../../../../User/User.js').saveUser;
+const replaceUser = require('../../../../../User/User.js').replaceUser;
 
-// IMPURE
-const updateUser = curry((credential, projectId) => getUser(credential)
+// updateUser :: Collection:db  String:credential -> String:projectId
+const updateUser = curry((db, credential, projectId) => getUser(db, credential)
     .then(isPinned(projectId))
     .then(clone)
-    .then(addPinnedProject(projectId))
-    .then(saveUser));
+    .then(addPinnedProject(projectId)));
 
 // signNewToken :: String:uid -> Token
 const signNewToken = (uid) => jwt.sign({ id: uid }, key, { algorithm: 'HS256' });
@@ -78,11 +77,16 @@ const sendError = curry((reply, err) => {
 module.exports = (request, reply) => {
   const projectId = request.payload.projectId;
   const credential = request.auth.credentials.id;
+  const db = request.server.plugins['hapi-mongodb'].db;
+  const collection = db.collection('users');
 
   isAuthenticated(request)
     .then(checkPayload)
     .then(isProjectValid)
-    .then(updateUser(credential))
+    .then(updateUser(collection, credential))
+    .then(replaceUser(collection, credential))
+    .then(get('ops'))
+    .then((arr) => arr[0])
     .then(get('id'))
     .then(sendResponse(reply, projectId))
     .catch(sendError(reply));
