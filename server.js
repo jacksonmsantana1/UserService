@@ -66,5 +66,9 @@ const startServer = (err) => {
 MongoDB
   .then(startServer)
   .then((err) => {
+    if (err) {
+      throw err;
+    }
+
     console.log('Server running...');
   });
