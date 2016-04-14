@@ -1,6 +1,8 @@
 const Boom = require('boom');
 const curry = require('ramda').curry;
 const get = require('ramda').prop;
+const nth = require('ramda').nth;
+const compose = require('ramda').compose;
 const jwt = require('jsonwebtoken');
 const key = require('../../../../../../privateKey.js');
 
@@ -51,7 +53,7 @@ const addPinnedProject = curry((projectId, user) => {
   return Promise.reject(Boom.badRequest('Invalid User'));
 });
 
-// saveUser :: User -> Promise(User, Error)
+// replaceUser :: User -> Promise(User, Error)
 const replaceUser = require('../../../../../User/User.js').replaceUser;
 
 // updateUser :: Collection:db  String:credential -> String:projectId
@@ -59,6 +61,9 @@ const updateUser = curry((db, credential, projectId) => getUser(db, credential)
     .then(isPinned(projectId))
     .then(clone)
     .then(addPinnedProject(projectId)));
+
+// getId :: ? -> String:uid
+const getId = compose(get('id'), nth(0), get('ops'));
 
 // signNewToken :: String:uid -> Token
 const signNewToken = (uid) => jwt.sign({ id: uid }, key, { algorithm: 'HS256' });
@@ -85,9 +90,7 @@ module.exports = (request, reply) => {
     .then(isProjectValid)
     .then(updateUser(collection, credential))
     .then(replaceUser(collection, credential))
-    .then(get('ops'))
-    .then((arr) => arr[0])
-    .then(get('id'))
+    .then(getId)
     .then(sendResponse(reply, projectId))
     .catch(sendError(reply));
 };
