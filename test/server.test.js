@@ -2,6 +2,7 @@ const Lab = require('lab');
 const lab = exports.lab = Lab.script();
 const expect = require('chai').expect;
 const Jwt = require('jsonwebtoken');
+const privateKey = require('../privateKey.js');
 
 const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://127.0.0.1:27017/test';
@@ -17,7 +18,6 @@ const after = lab.after;
 const server = require('../server.js');
 
 describe('User', () => {
-  let privateKey = 'dsakf34CONOUNAclOCUICObl3292weas34gbsLJ32f';
 
   let tokenHeader = (userId, options) => {
     options = options || {};
