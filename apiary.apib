@@ -1,0 +1,133 @@
+FORMAT: 1A
+HOST: http://localhost:3000
+
+# Users
+
+Users API allows users get  information about themselfs. 
+
+## User Collection [/user/{id}]
+
+### GET 401 - Inexistent Token [GET]
+(1˚) Request must contain a request header with an authorization value(token).
+
++ Parameters
+    + id: invalidId - ID from the user.
+    
++ Response 401 (application/json)
+
+        {
+            "statusCode": 401,
+            "error": "Unauthorized",
+            "message": "Missing authentication"
+        }
+    
+### GET 401 - Invalid Token [GET]
+(2˚) Request must contain a valid token.
+
++ Parameters
+    + id: 1234567890 - ID from the user.
+
++ Request (application/json)
+
+    + Headers 
+        
+            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEyMzQ1Njc4OTAiLCJpYXQiOjE0NjEzNTkwMjF9._geTpVaPaw63hl0gfHqCTq9J96HzD3c9Kui9CMQ89rI"
+            
++ Response 401 (application/json)
+
+        {
+            "statusCode": 401,
+            "error": "Unauthorized",
+            "message": "Invalid signature received for JSON Web Token validation"
+        }
+        
+### GET 400 - Insuficient Token [GET]
+(3˚) The token must contain the user's ID value.
+
++ Parameters
+    + id: invalidId - ID from the user.
+
++ Request (application/json)
+
+    + Headers 
+        
+            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhbnVzIjoiMTIzNDU2Nzg5IiwiaWF0IjoxNDYxMzU4OTM0fQ.SmSPE_-eh4BU7E1IaExtPpck2nI5H0-fprbmp7fRORY"
+
++ Response 400 (application/json)
+
+        {
+            "statusCode": 400,
+            "error": "Bad Request",
+            "message": "Invalid Token - ID value doesnt exist"
+        }
+        
+### GET 401 - Mismatched IDs [GET]
+(4˚) The token's ID must be equal to the request params ID.
+
++ Parameters
+    + id: 123456789 - ID from the user.
+
++ Request (application/json)
+
+    + Headers 
+        
+            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEyMzQ1Njc4OTAiLCJpYXQiOjE0NjEzNTkxMDF9.FASWb4Nx1XfqNHwkcBnalmZOxBx8N8k3V3yEYNj44P8"
+
++ Response 401 (application/json)
+
+        {
+            "statusCode": 401,
+            "error": "Unauthorized",
+            "message": "Invalid ID: 123456789"
+        }
+        
+### GET 400 - Inexistent User [GET]
+(5˚) It will return an error if the user doens't exist.
+
++ Parameters
+    + id: 1234 - ID from the user.
+
++ Request (application/json)
+
+    + Headers 
+        
+            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEyMzQiLCJpYXQiOjE0NjEzNTkyNzd9.rLcz1RMtywAshlTr_lzGp6TidFD_gPlyN2OMfIhOHG4"
+
++ Response 400 (application/json)
+
+        {
+            "statusCode": 400,
+            "error": "Bad Request",
+            "message": "Inexistent User"
+        }
+        
+### GET 200 [GET]
+(6˚) It will return the user informations. 
+
++ Parameters
+    + id: 12345 - ID from the user.
+
++ Request (application/json)
+
+    + Headers 
+        
+            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEyMzQ1IiwiaWF0IjoxNDYxMzU5MzUyfQ.hzFdOihrrxTgtyelH_Jn4Da2eFYFE47lwShMVHuDwIg"
+
++ Response 200 (application/json)
+
+    + Headers 
+    
+            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEyMzQ1IiwiaWF0IjoxNDYxMzU5ODQ4fQ.qOECACcJXCgljZFDyYHrN4xyVz5Ep9nnPHztaUecMnM"
+
+    + body
+
+            {
+                "id": "12345",
+                "email": "savedUser@mail.com",
+                "projects": {
+                    "pinned": ["12345"],
+                    "liked": [],
+                    "doneProjects": [],
+                    "inProgressProjects": [],
+                }
+            }
