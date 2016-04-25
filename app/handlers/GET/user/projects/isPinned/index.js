@@ -1,0 +1,57 @@
+const Boom = require('boom');
+const key = require('../../../../../../privateKey.js');
+const User = require('../../../../../User/User.js');
+const jwt = require('jsonwebtoken');
+
+const get = require('ramda').prop;
+const indexOf = require('ramda').indexOf;
+const curry = require('ramda').curry;
+const isNil = require('ramda').isNil;
+
+// isAutheticated :: (Request, String:credential) -> Promise(Request, Error)
+const isAuthenticated = (request, credential) => {
+  if (!!request && !!request.auth) {
+    return request.auth.isAuthenticated ? Promise.resolve(credential) :
+      Promise.reject(request.auth.error);
+  }
+
+  return Promise.reject(Boom.badImplementation('Invalid Request Object'));
+};
+
+// getUser :: Collection:db -> String:credential -> Promise(User, Error(BadRequest))
+const getUser = User.getUser;
+
+// isPinned :: Number:index -> Promise(true||false)
+const isPinned = (index) => {
+  return (index === -1) ? Promise.resolve(false) :
+    Promise.resolve(true);
+};
+
+// signNewToken :: String:credential -> Token
+const signNewToken = (credential) => jwt.sign({ id: credential }, key, { algorithm: 'HS256' });
+
+// sendResponse :: Response -> String:credential -> Boolean:isPinned -> Response
+const sendResponse = curry((response, credential, isPinned) => {
+  response(isPinned).header('authorization', signNewToken(credential));
+});
+
+// sendError :: Response:response -> Error -> Response(Error)
+const sendError = curry((response, error) => {
+  response(error);
+});
+
+module.exports = (request, response) => {
+  const credential = request.auth.credentials.id;
+  const projectId = request.params.id;
+  const db = request.server.plugins['hapi-mongodb'].db;
+  const collection = db.collection('users');
+
+  isAuthenticated(request, credential)
+   .then(getUser(collection))
+   .then(get('projects'))
+   .then(get('pinned'))
+   .then(indexOf(projectId))
+   .then(isPinned)
+   .then(sendResponse(response, credential))
+   .catch(sendError(response));
+};

@@ -49,6 +49,13 @@ server.route([{
     auth: 'token',
   },
   handler: require('./app/handlers/PUT/user/projects/desPinned/'),
+}, {
+  method: 'GET',
+  path: '/user/projects/isPinned/{id}',
+  config: {
+    auth: 'token',
+  },
+  handler: require('./app/handlers/GET/user/projects/isPinned/'),
 },
 ]);
 

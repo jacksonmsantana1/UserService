@@ -43,7 +43,7 @@ const signNewToken = (user) => jwt.sign({
 
 // sendUser :: Function -> User -> _
 const sendUser = R.curry((reply, user) => {
-  reply(user).header('authorization', signNewToken(user));
+  reply(user).header('authorization', 'Bearer ' + signNewToken(user));
   reply(user);
 });
 

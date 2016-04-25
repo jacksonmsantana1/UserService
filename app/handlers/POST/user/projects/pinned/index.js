@@ -16,7 +16,7 @@ const isAuthenticated = (request) => {
   return Promise.error(Boom.badRequest('Invalid Request Object'));
 };
 
-// checkPayload :: String:credential ->  RequestPayload:payload -> Promise(String:projectId, Error)
+// checkPayload ::  Payload:payload -> Promise(String:projectId, Error)
 const checkPayload = curry((payload) => {
   if (!!payload && !!payload.projectId) {
     return Promise.resolve(payload.projectId);

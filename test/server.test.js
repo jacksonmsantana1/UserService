@@ -22,19 +22,25 @@ describe('User', () => {
   let tokenHeader = (userId, options) => {
     options = options || {};
 
-    return 'Bearer ' + Jwt.sign({ id: userId }, privateKey, options);
+    return 'Bearer ' + Jwt.sign({
+      id: userId,
+    }, privateKey, options);
   };
 
   let invalidTokenHeader = (userId, options) => {
     options = options || {};
 
-    return 'Bearer ' + Jwt.sign({ anus: userId }, privateKey, options);
+    return 'Bearer ' + Jwt.sign({
+      anus: userId,
+    }, privateKey, options);
   };
 
   let invalidTokenKey = (userId, options) => {
     options = options || {};
 
-    return 'Bearer ' + Jwt.sign({ id: userId }, 'invalid private key', options);
+    return 'Bearer ' + Jwt.sign({
+      id: userId,
+    }, 'invalid private key', options);
   };
 
   let userDB;
@@ -76,7 +82,7 @@ describe('User', () => {
     it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
         method: 'GET',
-        url: '/user/invalidId'
+        url: '/user/invalidId',
       };
 
       server.inject(options, (response) => {
@@ -92,8 +98,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/1234567890',
         headers: {
-          authorization: invalidTokenKey('1234567890')
-        }
+          authorization: invalidTokenKey('1234567890'),
+        },
       };
       let strError = 'Invalid signature received for JSON Web Token validation';
 
@@ -109,8 +115,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/invalidId',
         headers: {
-          authorization: invalidTokenHeader('123456789')
-        }
+          authorization: invalidTokenHeader('123456789'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -127,8 +133,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/123456789',
         headers: {
-          authorization: tokenHeader('1234567890')
-        }
+          authorization: tokenHeader('1234567890'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -144,8 +150,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/1234',
         headers: {
-          authorization: tokenHeader('1234')
-        }
+          authorization: tokenHeader('1234'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -183,8 +189,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/projects',
         headers: {
-          authorization: tokenHeader('1234567890')
-        }
+          authorization: tokenHeader('1234567890'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -199,7 +205,7 @@ describe('User', () => {
     it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
         method: 'GET',
-        url: '/user/projects'
+        url: '/user/projects',
       };
 
       server.inject(options, (response) => {
@@ -214,8 +220,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/projects',
         headers: {
-          authorization: invalidTokenKey('1234567890')
-        }
+          authorization: invalidTokenKey('1234567890'),
+        },
       };
       let strError = 'Invalid signature received for JSON Web Token validation';
 
@@ -231,8 +237,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/projects',
         headers: {
-          authorization: invalidTokenHeader('1234567890')
-        }
+          authorization: invalidTokenHeader('1234567890'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -247,8 +253,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/projects',
         headers: {
-          authorization: tokenHeader('123456789')
-        }
+          authorization: tokenHeader('123456789'),
+        },
       };
       let strError = 'Inexistent User';
 
@@ -264,8 +270,8 @@ describe('User', () => {
         method: 'GET',
         url: '/user/projects',
         headers: {
-          authorization: tokenHeader('12345')
-        }
+          authorization: tokenHeader('12345'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -287,7 +293,7 @@ describe('User', () => {
     it('Should return an error if it s missing authentication', (done) => {
       let options = {
         method: 'POST',
-        url: '/user/projects/pinned'
+        url: '/user/projects/pinned',
       };
 
       server.inject(options, (response) => {
@@ -302,8 +308,8 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: invalidTokenHeader('123456789')
-        }
+          authorization: invalidTokenHeader('123456789'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -320,8 +326,8 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: invalidTokenKey('1234567890')
-        }
+          authorization: invalidTokenKey('1234567890'),
+        },
       };
       let strError = 'Invalid signature received for JSON Web Token validation';
 
@@ -337,11 +343,11 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('123456789')
+          authorization: tokenHeader('123456789'),
         },
         payload: {
-          projectId: '123456'
-        }
+          projectId: '123456',
+        },
       };
       let strError = 'Inexistent User';
 
@@ -357,11 +363,11 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('1234567890')
+          authorization: tokenHeader('1234567890'),
         },
         payload: {
-          projectId: '123456'
-        }
+          projectId: '123456',
+        },
       };
 
       server.inject(options, (response) => {
@@ -378,9 +384,9 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('1234567890')
+          authorization: tokenHeader('1234567890'),
         },
-        payload: {}
+        payload: {},
       };
 
       server.inject(options, (response) => {
@@ -395,11 +401,11 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('12345')
+          authorization: tokenHeader('12345'),
         },
         payload: {
-          projectId: '12345'
-        }
+          projectId: '12345',
+        },
       };
 
       server.inject(options, (response) => {
@@ -414,11 +420,11 @@ describe('User', () => {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('1234567890')
+          authorization: tokenHeader('1234567890'),
         },
         payload: {
-          projectId: 'DONT EXIST'
-        }
+          projectId: 'DONT EXIST',
+        },
       };
 
       server.inject(options, (response) => {
@@ -428,16 +434,16 @@ describe('User', () => {
       });
     });
 
-    it('Should update the user with the new pinned project and return it with a n authorization header', (done) => {
+    it('Should update the user with the new pinned project', (done) => {
       let options = {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('12345')
+          authorization: tokenHeader('12345'),
         },
         payload: {
-          projectId: '123456'
-        }
+          projectId: '123456',
+        },
       };
 
       server.inject(options, (response) => {
@@ -455,11 +461,11 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: tokenHeader('12345')
+          authorization: tokenHeader('12345'),
         },
         payload: {
-          projectId: '1234567890'
-        }
+          projectId: '1234567890',
+        },
       };
 
       server.inject(options, (response) => {
@@ -474,7 +480,7 @@ describe('User', () => {
     it('Should return an error if it s missing authentication', (done) => {
       let options = {
         method: 'PUT',
-        url: '/user/projects/desPinned'
+        url: '/user/projects/desPinned',
       };
 
       server.inject(options, (response) => {
@@ -489,8 +495,8 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: invalidTokenHeader('12345')
-        }
+          authorization: invalidTokenHeader('12345'),
+        },
       };
 
       server.inject(options, (response) => {
@@ -506,8 +512,8 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: invalidTokenKey('12345')
-        }
+          authorization: invalidTokenKey('12345'),
+        },
       };
       let strError = 'Invalid signature received for JSON Web Token validation';
 
@@ -523,9 +529,9 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: tokenHeader('12345')
+          authorization: tokenHeader('12345'),
         },
-        payload: {}
+        payload: {},
       };
 
       server.inject(options, (response) => {
@@ -540,11 +546,11 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: tokenHeader('12345')
+          authorization: tokenHeader('12345'),
         },
         payload: {
-          projectId: 'DONT EXIST'
-        }
+          projectId: 'DONT EXIST',
+        },
       };
 
       server.inject(options, (response) => {
@@ -559,11 +565,11 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: tokenHeader('123456789')
+          authorization: tokenHeader('123456789'),
         },
         payload: {
-          projectId: '12345'
-        }
+          projectId: '12345',
+        },
       };
       let strError = 'Inexistent User';
 
@@ -599,11 +605,11 @@ describe('User', () => {
         method: 'PUT',
         url: '/user/projects/desPinned',
         headers: {
-          authorization: tokenHeader('12345')
+          authorization: tokenHeader('12345'),
         },
         payload: {
-          projectId: '12345'
-        }
+          projectId: '12345',
+        },
       };
 
       server.inject(options, (response) => {
@@ -613,5 +619,141 @@ describe('User', () => {
       });
     });
   });
-});
 
+  describe('/user/projects/isPinned', () => {
+    it('Should be listenning to this endpoint', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+        payload: {
+          projectId: '1234567890',
+        },
+      };
+
+      server.inject(options, (response) => {
+        let res = response.raw.req;
+
+        expect(res.method).to.be.equal('GET');
+        expect(res.url).to.be.equal('/user/projects/isPinned/1');
+        done();
+      });
+    });
+
+    it('Should return an error if it s missing authentication', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal('Missing authentication');
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesn t contain the id value', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: invalidTokenHeader('12345'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(JSON.parse(response.payload).message)
+          .to.be.equal('Invalid Token - ID value doesnt exist');
+        done();
+      });
+    });
+
+    it('Should return an error if token isn t valid', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: invalidTokenKey('12345'),
+        },
+      };
+      let strError = 'Invalid signature received for JSON Web Token validation';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the request params is not given', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(404);
+        done();
+      });
+    });
+
+    it('Should return an error if the user`s id doenst exists', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: tokenHeader('123456789'),
+        },
+      };
+
+      let strError = 'Inexistent User';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return false if the project wasnt still pinned by the user', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(200);
+        expect(!!response.headers.authorization).to.be.equal(true);
+        expect(response.result).to.be.equal(false);
+        done();
+      });
+    });
+
+    it('Should return true if the project was already pinned by the user', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/123456',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(200);
+        expect(!!response.headers.authorization).to.be.equal(true);
+        expect(response.result).to.be.equal(true);
+        done();
+      });
+    });
+  });
+});
