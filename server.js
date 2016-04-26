@@ -14,9 +14,13 @@ server.connection({
 server.register(require('hapi-auth-jwt'), Auth(server));
 
 //MongoDB
+const mongoConfig = (process.env.NODE_ENV === 'test') ?
+  require('./app/plugins/mongodb/config.js').test :
+  require('./app/plugins/mongodb/config').postman;
+
 const MongoDB = server.register({
   register: require('hapi-mongodb'),
-  options: require('./app/plugins/mongodb/config.js').opts,
+  options: mongoConfig,
 });
 
 /**************************Routing************************************/
@@ -56,6 +60,10 @@ server.route([{
     auth: 'token',
   },
   handler: require('./app/handlers/GET/user/projects/isPinned/'),
+}, {
+  method: 'GET',
+  path: '/token/{id}',
+  handler: require('./app/handlers/GET/user/token/'),
 },
 ]);
 
@@ -67,6 +75,7 @@ const startServer = (err) => {
   }
 
   console.log('MongoDB running...');
+  console.log('Database: ' + mongoConfig.url);
   server.start();
 };
 

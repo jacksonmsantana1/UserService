@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const get = require('ramda').prop;
 const indexOf = require('ramda').indexOf;
 const curry = require('ramda').curry;
-const isNil = require('ramda').isNil;
 
 // isAutheticated :: (Request, String:credential) -> Promise(Request, Error)
 const isAuthenticated = (request, credential) => {
@@ -22,17 +21,16 @@ const isAuthenticated = (request, credential) => {
 const getUser = User.getUser;
 
 // isPinned :: Number:index -> Promise(true||false)
-const isPinned = (index) => {
-  return (index === -1) ? Promise.resolve(false) :
-    Promise.resolve(true);
-};
+const isPinned = (index) => ((index === -1) ?
+  Promise.resolve(false) :
+  Promise.resolve(true));
 
 // signNewToken :: String:credential -> Token
 const signNewToken = (credential) => jwt.sign({ id: credential }, key, { algorithm: 'HS256' });
 
-// sendResponse :: Response -> String:credential -> Boolean:isPinned -> Response
-const sendResponse = curry((response, credential, isPinned) => {
-  response(isPinned).header('authorization', signNewToken(credential));
+// sendResponse :: Response -> String:credential -> Boolean:isPin -> Response
+const sendResponse = curry((response, credential, isPin) => {
+  response(isPin).header('authorization', signNewToken(credential));
 });
 
 // sendError :: Response:response -> Error -> Response(Error)

@@ -44,7 +44,8 @@
     "mongodb": "^2.1.16",
     "ramda": "^0.20.1",
     "request": "^2.69.0",
-    "uuid": "^2.0.1"
+    "uuid": "^2.0.1",
+    "wreck": "^7.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.6.5",

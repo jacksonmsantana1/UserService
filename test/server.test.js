@@ -56,7 +56,7 @@ describe('User', () => {
       database = db;
       userDB = database.collection('users');
 
-      User.saveUser(userDB, users[1])
+      User.saveUser(userDB, users[2])
         .then((user) => {
           console.log('=>=>=> Saved user: ' + user.id);
           console.log('\n/*************Starting Handlers Tests**************/\n');

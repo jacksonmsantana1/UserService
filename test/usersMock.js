@@ -13,6 +13,16 @@ module.exports = [{
     inProgressProjects: [],
   },
 }, {
+  id: '1234',
+  email: 'updatedUser@mail.com',
+  password: 'UPDATED',
+  projects: {
+    pinned: ['1234'],
+    liked: [],
+    doneProjects: [],
+    inProgressProjects: [],
+  },
+}, {
   id: '12345',
   email: 'savedUser@mail.com',
   password: 'SAVED',
@@ -33,16 +43,6 @@ module.exports = [{
     inProgressProjects: [],
   },
 }, {
-  id: '1234',
-  email: 'updatedUser@mail.com',
-  password: 'UPDATED',
-  projects: {
-    pinned: ['1234'],
-    liked: [],
-    doneProjects: [],
-    inProgressProjects: [],
-  },
-}, {
   id: '123456',
   email: 'replacedUser@mail.com',
   password: 'REPLACED',
@@ -52,5 +52,16 @@ module.exports = [{
     doneProjects: [],
     inProgressProjects: [],
   },
+}, {
+  id: '1234567',
+  email: 'postmanUser@mail.com',
+  password: 'POSTMAN',
+  projects: {
+    pinned: ['1234567'],
+    liked: [],
+    doneProjects: [],
+    inProgressProjects: [],
+  },
 },
 ];
+
