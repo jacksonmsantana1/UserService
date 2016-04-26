@@ -34,17 +34,21 @@
   },
   "dependencies": {
     "boom": "^3.1.2",
+    "debug": "^2.2.0",
     "good": "^6.6.0",
     "good-file": "^5.1.2",
     "hapi": "^13.3.0",
     "hapi-auth-jwt": "^4.0.0",
     "hapi-mongodb": "^6.0.0",
+    "inert": "^3.2.0",
     "joi": "^5.1.0",
     "jsonwebtoken": "^5.7.0",
     "mongodb": "^2.1.16",
     "ramda": "^0.20.1",
     "request": "^2.69.0",
+    "tv": "^5.0.2",
     "uuid": "^2.0.1",
+    "vision": "^4.1.0",
     "wreck": "^7.2.0"
   },
   "devDependencies": {

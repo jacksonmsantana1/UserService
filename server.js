@@ -23,6 +23,9 @@ const MongoDB = server.register({
   options: mongoConfig,
 });
 
+//TV
+const TV = [require('tv'), require('inert'), require('vision')];
+
 /**************************Routing************************************/
 
 server.route([{
@@ -60,31 +63,44 @@ server.route([{
     auth: 'token',
   },
   handler: require('./app/handlers/GET/user/projects/isPinned/'),
-}, {
-  method: 'GET',
-  path: '/token/{id}',
-  handler: require('./app/handlers/GET/user/token/'),
 },
 ]);
 
 /**********************************Start***********************************/
 
-const startServer = (err) => {
+const mongoStart = (err) => {
   if (err) {
+    console.log('MongoDB Error');
     throw err;
   }
 
   console.log('MongoDB running...');
-  console.log('Database: ' + mongoConfig.url);
+  console.log(mongoConfig.url);
+  server.register(TV);
+};
+
+const tvStart = (err) => {
+  if (err) {
+    console.log('TV Error');
+    throw err;
+  }
+
+  console.log('TV running...');
+  console.log('/debug/console');
   server.start();
 };
 
-MongoDB
-  .then(startServer)
-  .then((err) => {
-    if (err) {
-      throw err;
-    }
+const serverStart = (err) => {
+  if (err) {
+    console.log('Server Error');
+    throw err;
+  }
 
-    console.log('Server running...');
-  });
+  console.log('Server running...');
+  console.log(server.info.uri);
+};
+
+MongoDB
+  .then(mongoStart)
+  .then(tvStart)
+  .then(serverStart);
