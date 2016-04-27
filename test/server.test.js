@@ -86,9 +86,8 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-
         expect(response.statusCode).to.be.equal(401);
-        expect(JSON.parse(response.payload).message).to.be.equal('Missing authentication');
+        expect(JSON.parse(response.payload).message).to.be.equal('Token Required');
         done();
       });
     });
@@ -101,7 +100,7 @@ describe('User', () => {
           authorization: invalidTokenKey('1234567890'),
         },
       };
-      let strError = 'Invalid signature received for JSON Web Token validation';
+      let strError = 'Invalid Token Signature';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
@@ -121,9 +120,9 @@ describe('User', () => {
 
       server.inject(options, (response) => {
 
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(JSON.parse(response.payload).message)
-          .to.be.equal('Invalid Token - ID value doesnt exist');
+          .to.be.equal('Token ID required');
         done();
       });
     });
@@ -210,7 +209,7 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
-        expect(response.result.message).to.be.equal('Missing authentication');
+        expect(response.result.message).to.be.equal('Token Required');
         done();
       });
     });
@@ -223,7 +222,7 @@ describe('User', () => {
           authorization: invalidTokenKey('1234567890'),
         },
       };
-      let strError = 'Invalid signature received for JSON Web Token validation';
+      let strError = 'Invalid Token Signature';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
@@ -242,8 +241,8 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
-        expect(response.result.message).to.be.equal('Invalid Token - ID value doesnt exist');
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal('Token ID required');
         done();
       });
     });
@@ -298,7 +297,7 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
-        expect(response.result.message).to.be.equal('Missing authentication');
+        expect(response.result.message).to.be.equal('Token Required');
         done();
       });
     });
@@ -314,9 +313,9 @@ describe('User', () => {
 
       server.inject(options, (response) => {
 
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(JSON.parse(response.payload).message)
-          .to.be.equal('Invalid Token - ID value doesnt exist');
+          .to.be.equal('Token ID required');
         done();
       });
     });
@@ -329,7 +328,7 @@ describe('User', () => {
           authorization: invalidTokenKey('1234567890'),
         },
       };
-      let strError = 'Invalid signature received for JSON Web Token validation';
+      let strError = 'Invalid Token Signature';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
@@ -485,7 +484,7 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
-        expect(response.result.message).to.be.equal('Missing authentication');
+        expect(response.result.message).to.be.equal('Token Required');
         done();
       });
     });
@@ -500,9 +499,9 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(JSON.parse(response.payload).message)
-          .to.be.equal('Invalid Token - ID value doesnt exist');
+          .to.be.equal('Token ID required');
         done();
       });
     });
@@ -515,7 +514,7 @@ describe('User', () => {
           authorization: invalidTokenKey('12345'),
         },
       };
-      let strError = 'Invalid signature received for JSON Web Token validation';
+      let strError = 'Invalid Token Signature';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
@@ -650,7 +649,7 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
-        expect(response.result.message).to.be.equal('Missing authentication');
+        expect(response.result.message).to.be.equal('Token Required');
         done();
       });
     });
@@ -665,9 +664,9 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(JSON.parse(response.payload).message)
-          .to.be.equal('Invalid Token - ID value doesnt exist');
+          .to.be.equal('Token ID required');
         done();
       });
     });
@@ -680,7 +679,7 @@ describe('User', () => {
           authorization: invalidTokenKey('12345'),
         },
       };
-      let strError = 'Invalid signature received for JSON Web Token validation';
+      let strError = 'Invalid Token Signature';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);

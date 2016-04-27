@@ -8,6 +8,10 @@ const key = require('../../../../../privateKey.js');
 
 // isAutheticated :: Request -> Promise(String:paramsId, Error)
 const isAuthenticated = (request) => {
+  if (request.auth.error) {
+    Promise.reject(request.auth.error);
+  }
+
   if (!!request && !!request.auth && !!request.params) {
     return request.auth.isAuthenticated ? Promise.resolve(request.params.id) :
       Promise.reject(request.auth.error);
