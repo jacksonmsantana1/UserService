@@ -424,7 +424,7 @@ describe('User', () => {
 
     it('Should be listening this endpoint', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: tokenHeader('1234567890'),
@@ -437,7 +437,7 @@ describe('User', () => {
       server.inject(options, (response) => {
         let res = response.raw.req;
 
-        expect(res.method).to.be.equal('POST');
+        expect(res.method).to.be.equal('PUT');
         expect(res.url).to.be.equal('/user/projects/pinned');
         done();
       });
@@ -445,7 +445,7 @@ describe('User', () => {
 
     it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
       };
 
@@ -458,7 +458,7 @@ describe('User', () => {
 
     it('Should return an error with the authorization header is incomplete', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: invalidTokenBearer('1234567890'),
@@ -475,7 +475,7 @@ describe('User', () => {
 
     it('Should return an error if token has an invalid signature', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: invalidTokenKey('1234567890'),
@@ -492,7 +492,7 @@ describe('User', () => {
 
     it('Should return an error if the token doesn t contain the id value', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: invalidTokenHeader('123456789'),
@@ -510,7 +510,7 @@ describe('User', () => {
 
     it('Should return an error if the token doesnt have a signature', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: withoutTokenSignature('1234567890'),
@@ -527,7 +527,7 @@ describe('User', () => {
 
     it('Should return an error if token request doenst contain the id value', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: tokenHeader('123456789'),
@@ -547,7 +547,7 @@ describe('User', () => {
 
     it('Should return an error if the token is expired', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: expiredToken('123456789'),
@@ -566,7 +566,7 @@ describe('User', () => {
 
     it('Should contain in the request the Project s ID', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: tokenHeader('1234567890'),
@@ -583,7 +583,7 @@ describe('User', () => {
 
     it('Should return an error if the project is already pinned by the user', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: tokenHeader('12345'),
@@ -602,7 +602,7 @@ describe('User', () => {
 
     it('Should return an error if the project don t exist', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: tokenHeader('1234567890'),
@@ -621,7 +621,7 @@ describe('User', () => {
 
     it('Should update the user with the new pinned project', (done) => {
       let options = {
-        method: 'POST',
+        method: 'PUT',
         url: '/user/projects/pinned',
         headers: {
           authorization: tokenHeader('12345'),
@@ -640,7 +640,7 @@ describe('User', () => {
     });
   });
 
-  describe('/user/projects/desPinned', () => {
+  describe('PUT /user/projects/desPinned', () => {
     it('Should be listenning to this endpoint', (done) => {
       let options = {
         method: 'PUT',
@@ -858,7 +858,7 @@ describe('User', () => {
     });
   });
 
-  describe('/user/projects/isPinned', () => {
+  describe('GET /user/projects/isPinned', () => {
     it('Should be listenning to this endpoint', (done) => {
       let options = {
         method: 'GET',

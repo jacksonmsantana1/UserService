@@ -71,12 +71,12 @@ const routeStart = () => server.route([{
   },
   handler: require('./app/handlers/GET/user/projects/'),
 }, {
-  method: 'POST',
+  method: 'PUT',
   path: '/user/projects/pinned',
   config: {
     auth: 'default',
   },
-  handler: require('./app/handlers/POST/user/projects/pinned/'),
+  handler: require('./app/handlers/PUT/user/projects/pinned/'),
 }, {
   method: 'PUT',
   path: '/user/projects/desPinned',

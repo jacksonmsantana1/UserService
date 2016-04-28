@@ -58,9 +58,9 @@ const replaceUser = require('../../../../../User/User.js').replaceUser;
 
 // updateUser :: Collection:db  String:credential -> String:projectId
 const updateUser = curry((db, credential, projectId) => getUser(db, credential)
-    .then(isPinned(projectId))
-    .then(clone)
-    .then(addPinnedProject(projectId)));
+  .then(isPinned(projectId))
+  .then(clone)
+  .then(addPinnedProject(projectId)));
 
 // getId :: ? -> String:uid
 const getId = compose(get('id'), nth(0), get('ops'));
