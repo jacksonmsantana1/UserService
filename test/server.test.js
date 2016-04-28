@@ -23,24 +23,52 @@ describe('User', () => {
     options = options || {};
 
     return 'Bearer ' + Jwt.sign({
-      id: userId,
-    }, privateKey, options);
+        id: userId,
+      }, privateKey, options);
   };
 
   let invalidTokenHeader = (userId, options) => {
     options = options || {};
 
     return 'Bearer ' + Jwt.sign({
-      anus: userId,
-    }, privateKey, options);
+        anus: userId,
+      }, privateKey, options);
   };
 
   let invalidTokenKey = (userId, options) => {
     options = options || {};
 
     return 'Bearer ' + Jwt.sign({
+        id: userId,
+      }, 'invalid private key', options);
+  };
+
+  let invalidTokenBearer = (userId, options) => {
+    options = options || {};
+
+    return Jwt.sign({
       id: userId,
     }, 'invalid private key', options);
+  };
+
+  let withoutTokenSignature = (userId, options) => {
+    options = options || {
+        algorithm: 'none',
+      };
+
+    return 'Bearer ' + Jwt.sign({
+        id: userId,
+      }, privateKey, options);
+  };
+
+  let expiredToken = (userId, options) => {
+    options = options || {
+        expiresIn: '1',
+      };
+
+    return 'Bearer ' + Jwt.sign({
+        id: userId,
+      }, privateKey, options);
   };
 
   let userDB;
@@ -77,8 +105,7 @@ describe('User', () => {
     });
   });
 
-  describe('/user/{id}', () => {
-
+  describe('GET /user/{id}', () => {
     it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
         method: 'GET',
@@ -92,7 +119,24 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if the token isnt valid', (done) => {
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/1234567890',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error with the token has an invalid signature', (done) => {
       let options = {
         method: 'GET',
         url: '/user/1234567890',
@@ -101,6 +145,23 @@ describe('User', () => {
         },
       };
       let strError = 'Invalid Token Signature';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesnt have a signature', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/1234567890',
+        headers: {
+          authorization: withoutTokenSignature('1234567890'),
+        },
+      };
+      let strError = 'Token Signature is required';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
@@ -127,7 +188,26 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if the token`s ID doesnt match with the url`s id', (done) => {
+    it('Should return an error if the token is expired', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/invalidId',
+        headers: {
+          authorization: expiredToken('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
+      });
+    });
+
+    it('Should return an error if the token s ID doesnt match with the url s id', (done) => {
       let options = {
         method: 'GET',
         url: '/user/123456789',
@@ -144,7 +224,7 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if the user with the given id doesnt exist', (done) => {
+    it('Should return an error if the user doesnt exist', (done) => {
       let options = {
         method: 'GET',
         url: '/user/1234',
@@ -181,7 +261,7 @@ describe('User', () => {
     });
   });
 
-  describe('/user/projects', () => {
+  describe('GET /user/projects', () => {
 
     it('Should be listening to this endpoint', (done) => {
       let options = {
@@ -214,7 +294,24 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if token isn t valid', (done) => {
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if token has an invalid signature', (done) => {
       let options = {
         method: 'GET',
         url: '/user/projects',
@@ -231,7 +328,24 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if token request doesnt contain id s value', (done) => {
+    it('Should return an error if the token doesnt have a signature', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects',
+        headers: {
+          authorization: withoutTokenSignature('1234567890'),
+        },
+      };
+      let strError = 'Token Signature is required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if token request doesnt contain the id value', (done) => {
       let options = {
         method: 'GET',
         url: '/user/projects',
@@ -244,6 +358,25 @@ describe('User', () => {
         expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal('Token ID required');
         done();
+      });
+    });
+
+    it('Should return an error if the token is expired', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects',
+        headers: {
+          authorization: expiredToken('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
       });
     });
 
@@ -287,9 +420,30 @@ describe('User', () => {
     });
   });
 
-  describe('/user/projects/pinned', () => {
+  describe('POST /user/projects/pinned', () => {
 
-    it('Should return an error if it s missing authentication', (done) => {
+    it('Should be listening this endpoint', (done) => {
+      let options = {
+        method: 'POST',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+        payload: {
+          projectId: '123456',
+        },
+      };
+
+      server.inject(options, (response) => {
+        let res = response.raw.req;
+
+        expect(res.method).to.be.equal('POST');
+        expect(res.url).to.be.equal('/user/projects/pinned');
+        done();
+      });
+    });
+
+    it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
         method: 'POST',
         url: '/user/projects/pinned',
@@ -298,6 +452,40 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal('Token Required');
+        done();
+      });
+    });
+
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'POST',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if token has an invalid signature', (done) => {
+      let options = {
+        method: 'POST',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: invalidTokenKey('1234567890'),
+        },
+      };
+      let strError = 'Invalid Token Signature';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
         done();
       });
     });
@@ -320,15 +508,15 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if token isn t valid', (done) => {
+    it('Should return an error if the token doesnt have a signature', (done) => {
       let options = {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: invalidTokenKey('1234567890'),
+          authorization: withoutTokenSignature('1234567890'),
         },
       };
-      let strError = 'Invalid Token Signature';
+      let strError = 'Token Signature is required';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
@@ -337,7 +525,7 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if the token s id doenst exists', (done) => {
+    it('Should return an error if token request doenst contain the id value', (done) => {
       let options = {
         method: 'POST',
         url: '/user/projects/pinned',
@@ -357,24 +545,22 @@ describe('User', () => {
       });
     });
 
-    it('Should be listening for a POST request to this endpoint', (done) => {
+    it('Should return an error if the token is expired', (done) => {
       let options = {
         method: 'POST',
         url: '/user/projects/pinned',
         headers: {
-          authorization: tokenHeader('1234567890'),
-        },
-        payload: {
-          projectId: '123456',
+          authorization: expiredToken('123456789'),
         },
       };
 
       server.inject(options, (response) => {
-        let res = response.raw.req;
-
-        expect(res.method).to.be.equal('POST');
-        expect(res.url).to.be.equal('/user/projects/pinned');
-        done();
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
       });
     });
 
@@ -476,7 +662,7 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if it s missing authentication', (done) => {
+    it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
         method: 'PUT',
         url: '/user/projects/desPinned',
@@ -485,6 +671,57 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal('Token Required');
+        done();
+      });
+    });
+
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if token has an invalid signature', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: invalidTokenKey('12345'),
+        },
+      };
+      let strError = 'Invalid Token Signature';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesnt have a signature', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: withoutTokenSignature('1234567890'),
+        },
+      };
+      let strError = 'Token Signature is required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
         done();
       });
     });
@@ -506,23 +743,6 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if token isn t valid', (done) => {
-      let options = {
-        method: 'PUT',
-        url: '/user/projects/desPinned',
-        headers: {
-          authorization: invalidTokenKey('12345'),
-        },
-      };
-      let strError = 'Invalid Token Signature';
-
-      server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(401);
-        expect(response.result.message).to.be.equal(strError);
-        done();
-      });
-    });
-
     it('Should contain in the request the Project s ID', (done) => {
       let options = {
         method: 'PUT',
@@ -537,6 +757,25 @@ describe('User', () => {
         expect(response.statusCode).to.be.equal(400);
         expect(response.result.message).to.be.equal('Missing the Project s ID');
         done();
+      });
+    });
+
+    it('Should return an error if the token is expired', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: expiredToken('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
       });
     });
 
@@ -641,7 +880,7 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if it s missing authentication', (done) => {
+    it('Should return an error if the request doesnt contain a token', (done) => {
       let options = {
         method: 'GET',
         url: '/user/projects/isPinned/1',
@@ -650,6 +889,57 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal('Token Required');
+        done();
+      });
+    });
+
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if token has an invalid signature', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: invalidTokenKey('12345'),
+        },
+      };
+      let strError = 'Invalid Token Signature';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesnt have a signature', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/projects/isPinned/1',
+        headers: {
+          authorization: withoutTokenSignature('1234567890'),
+        },
+      };
+      let strError = 'Token Signature is required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
         done();
       });
     });
@@ -671,20 +961,22 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if token isn t valid', (done) => {
+    it('Should return an error if the token is expired', (done) => {
       let options = {
         method: 'GET',
         url: '/user/projects/isPinned/1',
         headers: {
-          authorization: invalidTokenKey('12345'),
+          authorization: expiredToken('123456789'),
         },
       };
-      let strError = 'Invalid Token Signature';
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(401);
-        expect(response.result.message).to.be.equal(strError);
-        done();
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
       });
     });
 
