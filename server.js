@@ -11,17 +11,30 @@ server.auth.scheme('token', require('./app/plugins/auth/auth'));
 server.auth.strategy('default', 'token');
 
 const goodConfig = {
-  reporters: {
-    console: [{
-      module: 'good-squeeze',
-      name: 'Squeeze',
-      args: [{ log: '*', request: '*', response: '*' }],
+  reporters: [
+    {
+      reporter: require('good-console'),
+      events: {
+        log: 'Server',
+        request: 'Request',
+        error: 'ERROR',
+      },
     }, {
-      module: 'good-console',
+      config: 'error.log',
+      reporter: require('good-file'),
+      events: {
+        error: '*',
+      },
+    }, {
+      config: 'debug.log',
+      reporter: require('good-file'),
+      events: {
+        log: '*',
+        request: '*',
+        reponse: '*',
+      },
     },
-      'stdout',
-    ],
-  },
+  ],
 };
 
 const mongoConfig = (process.env.NODE_ENV === 'test') ?
@@ -35,9 +48,6 @@ const MongoPlugin = server.register({
   register: require('hapi-mongodb'),
   options: mongoConfig,
 });
-
-//TV
-const TvPlugin = server.register(require('tv'));
 
 //Good
 const GoodPlugin = server.register({
@@ -91,13 +101,6 @@ const routeStart = () => server.route([{
     auth: 'default',
   },
   handler: require('./app/handlers/GET/user/projects/isPinned/'),
-}, {
-  method: 'GET',
-  path: '/token',
-  config: {
-    auth: false,
-  },
-  handler: require('./app/handlers/GET/user/token/'),
 },
 ]);
 
@@ -105,67 +108,43 @@ const routeStart = () => server.route([{
 const start = () => {
   routeStart();
 
-  console.info('/*****************Routes****************/\n');
-  console.info('Routing running...\n');
+  server.log('Server', 'Routing Configured');
   return MongoPlugin;
 };
 
 const mongoStart = (err) => {
   if (err) {
-    console.info('/-----------------ERROR------------------/\n');
-    console.error('MongoDB Error');
+    server.log('ERROR', 'MongoDB Error');
     throw err;
   }
 
-  console.info('/*****************MongoDB****************/\n');
-  console.info('MongoDB running...');
-  console.info('-> ' + mongoConfig.url + '\n');
-  TvPlugin;
-};
-
-const tvStart = (err) => {
-  if (err) {
-    console.info('/-----------------ERROR------------------/\n');
-    console.error('TV Error');
-    throw err;
-  }
-
-  console.info('/*****************TV****************/\n');
-  console.info('TV running...');
-  console.info('-> /debug/console\n');
+  server.log('Server', 'MongoDB running on ' + mongoConfig.url);
   BlippPlugin;
 };
 
 const blippStart = (err) => {
   if (err) {
-    console.info('/-----------------ERROR------------------/\n');
-    console.error('Blipp Error');
+    server.log('ERROR', 'Blipp Error');
     throw err;
   }
 
-  console.info('/*****************Blipp****************/\n');
-  console.info('Blipp running...\n');
+  server.log('Server', 'Blipp Configured');
   GoodPlugin;
 };
 
 const serverStart = (err) => {
   if (err) {
-    console.info('/-----------------ERROR------------------/\n');
-    console.error('Good Error');
+    server.log('ERROR', 'Good Error');
     throw err;
   }
 
-  console.info('/*****************Good****************/\n');
-  console.info('Good running...\n');
+  server.log('Server', 'Good Configured');
   server.start(() => {
-    console.info('/*****************Server****************/\n');
-    console.info('Server running...');
-    console.info(server.info.uri + '\n');
+    server.log('Server', 'Server running on ' + server.info.uri);
   });
 };
 
 start()
   .then(mongoStart)
-  .then(tvStart)
   .then(blippStart)
   .then(serverStart);

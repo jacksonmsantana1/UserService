@@ -5,7 +5,7 @@ const get = require('ramda').prop;
 const indexOf = require('ramda').indexOf;
 const curry = require('ramda').curry;
 
-// isAutheticated :: (Request, String:credential) -> Promise(Request, Error)
+// isAuthenticated :: (Request, String:credential) -> Promise(Request, Error)
 const isAuthenticated = (request, credential) => {
   if (!!request && !!request.auth) {
     return request.auth.isAuthenticated ? Promise.resolve(credential) :
