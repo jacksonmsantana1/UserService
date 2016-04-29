@@ -67,6 +67,10 @@ const BlippPlugin = server.register({
 //Lout
 const LoutPlugin = server.register([require('vision'), require('inert'), require('lout')]);
 
+//TV
+//FIXME Only in DEVELOPMENT!!!
+const TVPlugin = server.register([require('vision'), require('inert'), require('tv')]);
+
 /**************************Routing************************************/
 
 const routeStart = () => server.route([{
@@ -122,6 +126,16 @@ const loutStart = (err) => {
   }
 
   server.log('Server', 'Lout Configured');
+  return TVPlugin;
+};
+
+const tvStart = (err) => {
+  if (err) {
+    server.log('ERROR', 'Tv Error');
+    return Promise.reject(err);
+  }
+
+  server.log('Server', 'Tv Configured');
   return MongoPlugin;
 };
 
@@ -165,6 +179,7 @@ const error = (err) => {
 
 start()
   .then(loutStart)
+  .then(tvStart)
   .then(mongoStart)
   .then(blippStart)
   .then(serverStart)
