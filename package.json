@@ -43,12 +43,15 @@
     "hapi": "^13.3.0",
     "hapi-auth-jwt2": "^5.8.0",
     "hapi-mongodb": "^6.0.0",
+    "inert": "^3.2.0",
     "joi": "^5.1.0",
     "jsonwebtoken": "^5.7.0",
+    "lout": "^9.0.0",
     "mongodb": "^2.1.16",
     "ramda": "^0.20.1",
     "request": "^2.69.0",
     "uuid": "^2.0.1",
+    "vision": "^4.1.0",
     "wreck": "^7.2.0"
   },
   "devDependencies": {

@@ -64,6 +64,9 @@ const BlippPlugin = server.register({
   },
 });
 
+//Lout
+const LoutPlugin = server.register([require('vision'), require('inert'), require('lout')]);
+
 /**************************Routing************************************/
 
 const routeStart = () => server.route([{
@@ -109,33 +112,44 @@ const start = () => {
   routeStart();
 
   server.log('Server', 'Routing Configured');
+  return LoutPlugin;
+};
+
+const loutStart = (err) => {
+  if (err) {
+    server.log('ERROR', 'Lout Error');
+    return Promise.reject(err);
+  }
+
+  server.log('Server', 'Lout Configured');
   return MongoPlugin;
 };
 
 const mongoStart = (err) => {
   if (err) {
     server.log('ERROR', 'MongoDB Error');
-    throw err;
+    return Promise.reject(err);
   }
 
   server.log('Server', 'MongoDB running on ' + mongoConfig.url);
-  BlippPlugin;
+  return BlippPlugin;
 };
 
 const blippStart = (err) => {
   if (err) {
     server.log('ERROR', 'Blipp Error');
-    throw err;
+    return Promise.reject(err);
   }
 
   server.log('Server', 'Blipp Configured');
-  GoodPlugin;
+  return GoodPlugin;
 };
 
+/*eslint consistent-return:1*/
 const serverStart = (err) => {
   if (err) {
     server.log('ERROR', 'Good Error');
-    throw err;
+    return Promise.reject(err);
   }
 
   server.log('Server', 'Good Configured');
@@ -144,7 +158,14 @@ const serverStart = (err) => {
   });
 };
 
+const error = (err) => {
+  server.log('ERROR', 'Server crashed');
+  throw err;
+};
+
 start()
+  .then(loutStart)
   .then(mongoStart)
   .then(blippStart)
-  .then(serverStart);
+  .then(serverStart)
+  .catch(error);
