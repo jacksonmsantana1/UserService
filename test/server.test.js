@@ -145,7 +145,6 @@ describe('User', () => {
         },
       };
       let strError = 'Invalid Token Signature';
-
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal(strError);
@@ -162,7 +161,6 @@ describe('User', () => {
         },
       };
       let strError = 'Token Signature is required';
-
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal(strError);
@@ -180,7 +178,6 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-
         expect(response.statusCode).to.be.equal(401);
         expect(JSON.parse(response.payload).message)
           .to.be.equal('Token ID required');
