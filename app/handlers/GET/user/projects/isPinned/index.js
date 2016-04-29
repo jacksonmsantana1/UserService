@@ -1,7 +1,5 @@
 const Boom = require('boom');
-const key = require('../../../../../../privateKey.js');
 const User = require('../../../../../User/User.js');
-const jwt = require('jsonwebtoken');
 
 const get = require('ramda').prop;
 const indexOf = require('ramda').indexOf;
@@ -25,12 +23,9 @@ const isPinned = (index) => ((index === -1) ?
   Promise.resolve(false) :
   Promise.resolve(true));
 
-// signNewToken :: String:credential -> Token
-const signNewToken = (credential) => jwt.sign({ id: credential }, key, { algorithm: 'HS256' });
-
 // sendResponse :: Response -> String:credential -> Boolean:isPin -> Response
 const sendResponse = curry((response, credential, isPin) => {
-  response(isPin).header('authorization', signNewToken(credential));
+  response(isPin);
 });
 
 // sendError :: Response:response -> Error -> Response(Error)
