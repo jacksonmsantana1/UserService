@@ -1,15 +1,5 @@
 const Boom = require('boom');
-const jwt = require('jsonwebtoken');
-const key = require('../../../../../../privateKey.js');
-
 const curry = require('ramda').curry;
-const compose = require('ramda').compose;
-const lensProp = require('ramda').lensProp;
-const set = require('ramda').set;
-const get = require('ramda').prop;
-const filter = require('ramda').filter;
-const uniq = require('ramda').uniq;
-const contains = require('ramda').contains;
 
 // isAutheticated :: Request -> Promise(RequestPayload, Error)
 const isAuthenticated = (request) => {
@@ -33,64 +23,28 @@ const checkPayload = (payload) => {
 // isProjectValid :: String:projectId -> Promise(String:projectId, Error)
 const isProjectValid = require('../../../../../plugins/Project/').isValid;
 
-// getUser :: Collection:db -> String:credential -> Promise(User, Error)
-const getUser = require('../../../../../User/User.js').getUser;
+// despin :: Collection:db -> String:credential -> String:projectId -> Promise(String, Error)
+const despin = require('../../../../../User/User.js').removePinnedProject;
 
-// setPinnedProjects :: String:projectId -> User: user -> User: user
-const setPinnedProjects = curry((projectId, user) => {
-  const projectsLens = lensProp('projects');
-  const pinnedLens = lensProp('pinned');
-  const lenses = compose(projectsLens, pinnedLens);
-
-  const fn = compose(filter(id => id !== projectId),
-    uniq,
-    get('pinned'),
-    get('projects'));
-
-  return set(lenses, fn(user), user);
-});
-
-// isPinned :: String:projectID -> User -> Promise(User, Error)
-const isPinned = curry((projectId, user) => {
-  const fn = compose(contains(projectId), get('pinned'), get('projects'));
-
-  return fn(user) ? Promise.resolve(user) :
-    Promise.reject(Boom.badRequest('Can t despin this project'));
-});
-
-// setUser :: Collection:db String:credential -> String:projectId -> User
-const setUser = curry((db, credential, projectId) => getUser(db, credential)
-    .then(isPinned(projectId))
-    .then(setPinnedProjects(projectId)));
-
-// replaceUser :: Collection:db -> String:uid -> User:newUser -> Promise(User, Error)
-const replaceUser = require('../../../../../User/User.js').replaceUser;
-
-// signNewToken :: String:credential -> Token
-const signNewToken = (credential) => jwt.sign({ id: credential }, key, { algorithm: 'HS256' });
-
-// sendResponse :: Function -> String:projectId -> Response
-const sendResponse = curry((reply, projectId, user) => {
-  reply(projectId).header('authorization', signNewToken(user.id));
+// sendResponse :: Response -> String:projectId -> Response
+const sendResponse = curry((reply, projectId) => {
   reply(projectId);
 });
 
-// sendError :: Function -> Error -> Response
+// sendError :: Response -> Error -> Response
 const sendError = curry((reply, err) => {
   reply(err);
 });
 
 module.exports = (request, reply) => {
   const credential = request.auth.credentials.id;
-  const projectId = request.payload.projectId;
   const db = request.server.plugins['hapi-mongodb'].db;
   const collection = db.collection('users');
 
   isAuthenticated(request)
     .then(checkPayload)
     .then(isProjectValid)
-    .then(setUser(collection, credential))
-    .then(replaceUser(collection, credential))
-    .then(sendResponse(reply, projectId))
+    .then(despin(collection, credential))
+    .then(sendResponse(reply))
     .catch(sendError(reply));
 };

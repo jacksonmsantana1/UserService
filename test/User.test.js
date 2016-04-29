@@ -180,7 +180,6 @@ describe('User', () => {
     it('Should return an error if is not given an id', (done) => {
       User.addPinnedProject(userDB, '', '')
         .catch((err) => {
-          console.log(err.message);
           expect(err.output.statusCode).to.be.equal(400);
           expect(err.message).to.be.equal('Invalid ID');
           done();
@@ -209,6 +208,52 @@ describe('User', () => {
       User.addPinnedProject(userDB, '1234', 'pinned')
         .then((result) => {
           expect(result).to.be.equal('pinned');
+          done();
+        });
+    });
+  });
+
+  describe('removePinnedProject() => ', () => {
+    it('Should return an error if the db given is invalid', (done) => {
+      User.removePinnedProject(invalidDB, 'id', '')
+        .catch((err) => {
+          expect(err.output.statusCode).to.be.equal(500);
+          expect(err.message).to.be.equal('Trying to access an invalid collection: ' + 'invalid');
+          done();
+        });
+    });
+
+    it('Should return an error if is not given an id', (done) => {
+      User.removePinnedProject(userDB, '', '')
+        .catch((err) => {
+          expect(err.output.statusCode).to.be.equal(400);
+          expect(err.message).to.be.equal('Invalid ID');
+          done();
+        });
+    });
+
+    it('Should return an error if its an inexistent user', (done) => {
+      User.removePinnedProject(userDB, '123456789', '')
+        .catch((err) => {
+          expect(err.output.statusCode).to.be.equal(400);
+          expect(err.message).to.be.equal('Inexistent User');
+          done();
+        });
+    });
+
+    it('Should return an error if the user have already removed the project ID', (done) => {
+      User.removePinnedProject(userDB, '1234', '12345')
+        .catch((err) => {
+          expect(err.output.statusCode).to.be.equal(400);
+          expect(err.message).to.be.equal('Project was already removed');
+          done();
+        });
+    });
+
+    it('Should return the project ID if everything was OK', (done) => {
+      User.removePinnedProject(userDB, '1234', '1234')
+        .then((result) => {
+          expect(result).to.be.equal('1234');
           done();
         });
     });

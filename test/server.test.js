@@ -829,7 +829,7 @@ describe('User', () => {
           projectId: '1234567890',
         },
       };
-      let strError = 'Can t despin this project';
+      let strError = 'Project was already removed';
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
