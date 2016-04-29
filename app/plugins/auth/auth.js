@@ -44,7 +44,22 @@ const _authenticate = (request, reply) => {
   });
 };
 
+const _response = (request, reply) => {
+  const options = {
+    algorithm: 'HS256',
+    expiresIn: 7200000,
+  };
+
+  if (!!request && !!request.auth && request.auth.isAuthenticated) {
+    request.response
+      .header('authorization', 'Bearer ' + jwt.sign(request.auth.credentials, KEY, options));
+  }
+
+  reply.continue();
+};
+
 /*eslint no-unused-vars:1*/
 module.exports = (server, options) => ({
   authenticate: _authenticate,
+  response: _response,
 });

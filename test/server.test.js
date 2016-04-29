@@ -420,7 +420,7 @@ describe('User', () => {
     });
   });
 
-  describe('POST /user/projects/pinned', () => {
+  describe('PUT /user/projects/pinned', () => {
 
     it('Should be listening this endpoint', (done) => {
       let options = {

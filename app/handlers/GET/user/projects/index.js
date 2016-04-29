@@ -1,8 +1,6 @@
 const curry = require('ramda').curry;
 const get = require('ramda').prop;
 const Boom = require('boom');
-const jwt = require('jsonwebtoken');
-const key = require('../../../../../privateKey.js');
 
 // isAutheticated :: (Request, String:credential) -> Promise(ID, Error)
 const isAuthenticated = (request, credential) => {
@@ -16,15 +14,6 @@ const isAuthenticated = (request, credential) => {
 
 // getUser :: Collection:db -> Collection -> String:uid -> Promise(User, Error)
 const getUser = require('../../../../User/User.js').getUser;
-
-// signNewToken :: String:uid -> Token
-const signNewToken = (uid) => jwt.sign({ id: uid }, key, { algorithm: 'HS256' });
-
-// setAuthorizationHeader :: Function:reply -> String:credential -> Promise([Project])
-const setAuthorizationHeader = curry((reply, credential, projects) => {
-  reply(projects).header('authorization', signNewToken(credential));
-  return Promise.resolve(projects);
-});
 
 // sendProjects :: Function:reply -> [Project] -> Response([Project], Error)
 const sendProjects = curry((reply, projects) => {
@@ -48,7 +37,6 @@ module.exports = (request, reply) => {
   isAuthenticated(request, credential)
     .then(getUser(collection))
     .then(get('projects'))
-    .then(setAuthorizationHeader(reply, credential))
     .then(sendProjects(reply))
     .catch(sendError(reply));
 };

@@ -1,8 +1,6 @@
 const Boom = require('boom');
 const R = require('ramda');
 const User = require('../../../../User/User.js');
-const jwt = require('jsonwebtoken');
-const key = require('../../../../../privateKey.js');
 
 /**************************Pure Functions**********************************/
 
@@ -39,15 +37,10 @@ const deleteUserPws = (user) => {
 };
 
 // signNewToken :: User -> Token
-const signNewToken = (user) => jwt.sign({
-  id: user.id,
-}, key, {
-  algorithm: 'HS256',
-});
 
 // sendUser :: Function -> User -> _
 const sendUser = R.curry((reply, user) => {
-  reply(user).header('authorization', signNewToken(user));
+  reply(user);
 });
 
 // sendError -> Function -> Error -> _
