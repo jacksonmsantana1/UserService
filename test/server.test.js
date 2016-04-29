@@ -573,7 +573,23 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
-        expect(response.result.message).to.be.equal('Missing the Project s ID');
+        expect(response.result.message).to.be.equal('child "projectId" fails because [projectId is required]');
+        done();
+      });
+    });
+
+    it('Should contain a not empty payload', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/pinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('"value" must be an object');
         done();
       });
     });
@@ -752,11 +768,27 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
-        expect(response.result.message).to.be.equal('Missing the Project s ID');
+        expect(response.result.message).to.be.equal('child "projectId" fails because [projectId is required]');
         done();
       });
     });
 
+    it('Should contain a not empty payload', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/desPinned',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('"value" must be an object');
+        done();
+      });
+    });
+    
     it('Should return an error if the token is expired', (done) => {
       let options = {
         method: 'PUT',

@@ -1,5 +1,6 @@
 const Boom = require('boom');
 const curry = require('ramda').curry;
+const get = require('ramda').prop;
 
 // isAutheticated :: Request -> Promise(Payload, Error)
 const isAuthenticated = (request) => {
@@ -10,15 +11,6 @@ const isAuthenticated = (request) => {
 
   return Promise.error(Boom.badRequest('Invalid Request Object'));
 };
-
-// checkPayload ::  Payload:payload -> Promise(String:projectId, Error)
-const checkPayload = curry((payload) => {
-  if (!!payload && !!payload.projectId) {
-    return Promise.resolve(payload.projectId);
-  }
-
-  return Promise.reject(Boom.badRequest('Missing the Project s ID'));
-});
 
 // isProjectValid :: String:projectId -> Promise(String:projectId, Error)
 const isProjectValid = require('../../../../../plugins/Project/').isValid;
@@ -42,7 +34,7 @@ module.exports = (request, reply) => {
   const collection = db.collection('users');
 
   isAuthenticated(request)
-    .then(checkPayload)
+    .then(get('projectId'))
     .then(isProjectValid)
     .then(pinned(collection, credential))
     .then(sendResponse(reply))

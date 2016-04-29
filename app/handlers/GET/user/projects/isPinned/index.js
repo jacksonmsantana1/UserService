@@ -5,10 +5,10 @@ const get = require('ramda').prop;
 const indexOf = require('ramda').indexOf;
 const curry = require('ramda').curry;
 
-// isAuthenticated :: (Request, String:credential) -> Promise(Request, Error)
-const isAuthenticated = (request, credential) => {
-  if (!!request && !!request.auth) {
-    return request.auth.isAuthenticated ? Promise.resolve(credential) :
+// isAuthenticated :: (Request) -> Promise(Request, Error)
+const isAuthenticated = (request) => {
+  if (!!request && !!request.auth && !!request.params) {
+    return request.auth.isAuthenticated ? Promise.resolve(request.auth.credentials) :
       Promise.reject(request.auth.error);
   }
 
@@ -23,8 +23,8 @@ const isPinned = (index) => ((index === -1) ?
   Promise.resolve(false) :
   Promise.resolve(true));
 
-// sendResponse :: Response -> String:credential -> Boolean:isPin -> Response
-const sendResponse = curry((response, credential, isPin) => {
+// sendResponse :: Response -> Boolean:isPin -> Response
+const sendResponse = curry((response, isPin) => {
   response(isPin);
 });
 
@@ -34,17 +34,17 @@ const sendError = curry((response, error) => {
 });
 
 module.exports = (request, response) => {
-  const credential = request.auth.credentials.id;
   const projectId = request.params.id;
   const db = request.server.plugins['hapi-mongodb'].db;
   const collection = db.collection('users');
 
-  isAuthenticated(request, credential)
+  isAuthenticated(request)
+   .then(get('id'))
    .then(getUser(collection))
    .then(get('projects'))
    .then(get('pinned'))
    .then(indexOf(projectId))
    .then(isPinned)
-   .then(sendResponse(response, credential))
+   .then(sendResponse(response))
    .catch(sendError(response));
 };

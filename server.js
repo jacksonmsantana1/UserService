@@ -1,4 +1,5 @@
 const Hapi = require('hapi');
+const Joi = require('joi');
 const server = module.exports = new Hapi.Server();
 
 /***************************Server Config******************************/
@@ -78,6 +79,14 @@ const routeStart = () => server.route([{
   path: '/user/{id}',
   config: {
     auth: 'default',
+    description: 'Retrieve the User information',
+    tags: ['user'],
+    notes: 'NOT the same as UserAdmin',
+    validate: {
+      params: {
+        id: Joi.string().required(),
+      },
+    },
   },
   handler: require('./app/handlers/GET/user/id/'),
 }, {
@@ -85,6 +94,8 @@ const routeStart = () => server.route([{
   path: '/user/projects',
   config: {
     auth: 'default',
+    description: 'Retrieve the User Projects',
+    tags: ['user', 'project'],
   },
   handler: require('./app/handlers/GET/user/projects/'),
 }, {
@@ -92,6 +103,13 @@ const routeStart = () => server.route([{
   path: '/user/projects/pinned',
   config: {
     auth: 'default',
+    description: 'Add the Project ID to the User Projects object(projects.pinned)',
+    tags: ['project', 'pinned'],
+    validate: {
+      payload: {
+        projectId: Joi.string().required(),
+      },
+    },
   },
   handler: require('./app/handlers/PUT/user/projects/pinned/'),
 }, {
@@ -99,6 +117,13 @@ const routeStart = () => server.route([{
   path: '/user/projects/desPinned',
   config: {
     auth: 'default',
+    description: 'Remove the Project ID from the User Projects object(projects.pinned)',
+    tags: ['project', 'desPinned'],
+    validate: {
+      payload: {
+        projectId: Joi.string().required(),
+      },
+    },
   },
   handler: require('./app/handlers/PUT/user/projects/desPinned/'),
 }, {
@@ -106,6 +131,13 @@ const routeStart = () => server.route([{
   path: '/user/projects/isPinned/{id}',
   config: {
     auth: 'default',
+    description: 'Tells if the User have already pinned the Project',
+    tags: ['project', 'pinned'],
+    validate: {
+      params: {
+        id: Joi.string().required(),
+      },
+    },
   },
   handler: require('./app/handlers/GET/user/projects/isPinned/'),
 },
