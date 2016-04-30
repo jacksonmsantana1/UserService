@@ -788,7 +788,7 @@ describe('User', () => {
         done();
       });
     });
-    
+
     it('Should return an error if the token is expired', (done) => {
       let options = {
         method: 'PUT',

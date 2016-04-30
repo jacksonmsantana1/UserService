@@ -16,14 +16,15 @@ const goodConfig = {
     {
       reporter: require('good-console'),
       events: {
-        log: 'Server',
-        request: 'Request',
-        error: 'ERROR',
+        log: '*',
+        request: '*',
+        error: '*',
       },
     }, {
       config: 'error.log',
       reporter: require('good-file'),
       events: {
+        request: 'ERROR',
         error: '*',
       },
     }, {
@@ -31,8 +32,22 @@ const goodConfig = {
       reporter: require('good-file'),
       events: {
         log: '*',
-        request: '*',
+        request: [
+          'INFO',
+          '/user/{id}',
+          '/user/projects',
+          '/user/projects/isPinned/{id}',
+          '/user/projects/pinned',
+          '/user/projects/desPinned',
+        ],
         reponse: '*',
+      },
+    }, {
+      config: 'auth.log',
+      reporter: require('good-file'),
+      events: {
+        request: 'AUTH',
+        reponse: 'AUTH',
       },
     },
   ],
@@ -147,7 +162,7 @@ const routeStart = () => server.route([{
 const start = () => {
   routeStart();
 
-  server.log('Server', 'Routing Configured');
+  server.log('INFO', 'Routing Configured');
   return LoutPlugin;
 };
 
@@ -157,7 +172,7 @@ const loutStart = (err) => {
     return Promise.reject(err);
   }
 
-  server.log('Server', 'Lout Configured');
+  server.log('INFO', 'Lout Configured');
   return TVPlugin;
 };
 
@@ -167,7 +182,7 @@ const tvStart = (err) => {
     return Promise.reject(err);
   }
 
-  server.log('Server', 'Tv Configured');
+  server.log('INFO', 'Tv Configured');
   return MongoPlugin;
 };
 
@@ -177,7 +192,7 @@ const mongoStart = (err) => {
     return Promise.reject(err);
   }
 
-  server.log('Server', 'MongoDB running on ' + mongoConfig.url);
+  server.log('INFO', 'MongoDB running on ' + mongoConfig.url);
   return BlippPlugin;
 };
 
@@ -187,7 +202,7 @@ const blippStart = (err) => {
     return Promise.reject(err);
   }
 
-  server.log('Server', 'Blipp Configured');
+  server.log('INFO', 'Blipp Configured');
   return GoodPlugin;
 };
 
@@ -198,9 +213,9 @@ const serverStart = (err) => {
     return Promise.reject(err);
   }
 
-  server.log('Server', 'Good Configured');
+  server.log('INFO', 'Good Configured');
   server.start(() => {
-    server.log('Server', 'Server running on ' + server.info.uri);
+    server.log('INFO', 'Server running on ' + server.info.uri);
   });
 };
 

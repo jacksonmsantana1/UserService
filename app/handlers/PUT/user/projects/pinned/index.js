@@ -1,4 +1,6 @@
 const Boom = require('boom');
+const logMessage = require('../../../../../plugins/logger/');
+
 const curry = require('ramda').curry;
 const get = require('ramda').prop;
 
@@ -18,13 +20,17 @@ const isProjectValid = require('../../../../../plugins/Project/').isValid;
 // pinned :: Database -> String:credential -> String:projectId -> Promise(String, Error)
 const pinned = require('../../../../../User/User').addPinnedProject;
 
-// sendResponse :: Response:reply -> String:projectId -> Response
-const sendResponse = curry((reply, projectId) => {
+// sendResponse :: Request -> Response -> String:projectId -> Response
+const sendResponse = curry((request, reply, projectId) => {
+  request.log('/user/projects/pinned',
+    logMessage(request.id, true, request.auth.credentials.id, request.path, 'OK 200'));
   reply(projectId);
 });
 
-// sendError :: Response:reply -> Error -> Response
-const sendError = curry((reply, err) => {
+// sendError :: Request -> Response -> Response(Error)
+const sendError = curry((request, reply, err) => {
+  request.log('ERROR',
+    logMessage(request.id, false, request.auth.credentials.id, request.path, err.message));
   reply(err);
 });
 
@@ -33,10 +39,12 @@ module.exports = (request, reply) => {
   const db = request.server.plugins['hapi-mongodb'].db;
   const collection = db.collection('users');
 
+  request.log('/user/projects/pinned',
+    logMessage(request.id, true, credential, request.path, 'Endpoint reached'));
   isAuthenticated(request)
     .then(get('projectId'))
     .then(isProjectValid)
     .then(pinned(collection, credential))
-    .then(sendResponse(reply))
-    .catch(sendError(reply));
+    .then(sendResponse(request, reply))
+    .catch(sendError(request, reply));
 };

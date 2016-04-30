@@ -1,5 +1,6 @@
 const Boom = require('boom');
 const User = require('../../../../../User/User.js');
+const logMessage = require('../../../../../plugins/logger/');
 
 const get = require('ramda').prop;
 const indexOf = require('ramda').indexOf;
@@ -23,21 +24,28 @@ const isPinned = (index) => ((index === -1) ?
   Promise.resolve(false) :
   Promise.resolve(true));
 
-// sendResponse :: Response -> Boolean:isPin -> Response
-const sendResponse = curry((response, isPin) => {
+// sendResponse ::Request -> Response -> Boolean:isPin -> Response(Boolean)
+const sendResponse = curry((request, response, isPin) => {
+  request.log('/user/projects/isPinned/{id}',
+    logMessage(request.id, true, request.auth.credentials.id, request.path, 'OK 200'));
   response(isPin);
 });
 
-// sendError :: Response:response -> Error -> Response(Error)
-const sendError = curry((response, error) => {
+// sendError :: Request -> Response -> Error -> Response(Error)
+const sendError = curry((request, response, error) => {
+  request.log('ERROR',
+    logMessage(request.id, false, request.auth.credentials.id, request.path, error.message));
   response(error);
 });
 
 module.exports = (request, response) => {
   const projectId = request.params.id;
+  const credential = request.auth.credentials.id;
   const db = request.server.plugins['hapi-mongodb'].db;
   const collection = db.collection('users');
 
+  request.log('/user/projects/isPinned/{id}',
+    logMessage(request.id, true, credential, request.path, 'Endpoint reached'));
   isAuthenticated(request)
    .then(get('id'))
    .then(getUser(collection))
@@ -45,6 +53,6 @@ module.exports = (request, response) => {
    .then(get('pinned'))
    .then(indexOf(projectId))
    .then(isPinned)
-   .then(sendResponse(response))
-   .catch(sendError(response));
+   .then(sendResponse(request, response))
+   .catch(sendError(request, response));
 };
