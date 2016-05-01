@@ -12,44 +12,43 @@ server.auth.scheme('token', require('./app/plugins/auth/auth'));
 server.auth.strategy('default', 'token');
 
 const goodConfig = {
-  reporters: [
-    {
-      reporter: require('good-console'),
-      events: {
-        log: '*',
-        request: '*',
-        error: '*',
-      },
-    }, {
-      config: 'error.log',
-      reporter: require('good-file'),
-      events: {
-        request: 'ERROR',
-        error: '*',
-      },
-    }, {
-      config: 'debug.log',
-      reporter: require('good-file'),
-      events: {
-        log: '*',
-        request: [
-          'INFO',
-          '/user/{id}',
-          '/user/projects',
-          '/user/projects/isPinned/{id}',
-          '/user/projects/pinned',
-          '/user/projects/desPinned',
-        ],
-        reponse: '*',
-      },
-    }, {
-      config: 'auth.log',
-      reporter: require('good-file'),
-      events: {
-        request: 'AUTH',
-        reponse: 'AUTH',
-      },
+  reporters: [{
+    reporter: require('good-console'),
+    events: {
+      log: '*',
+      request: '*',
+      error: '*',
     },
+  }, {
+    config: 'error.log',
+    reporter: require('good-file'),
+    events: {
+      request: 'ERROR',
+      error: '*',
+    },
+  }, {
+    config: 'debug.log',
+    reporter: require('good-file'),
+    events: {
+      log: '*',
+      request: [
+        'INFO',
+        '/user/{id}',
+        '/user/projects',
+        '/user/projects/isPinned/{id}',
+        '/user/projects/pinned',
+        '/user/projects/desPinned',
+      ],
+      reponse: '*',
+    },
+  }, {
+    config: 'auth.log',
+    reporter: require('good-file'),
+    events: {
+      request: 'AUTH',
+      reponse: 'AUTH',
+    },
+  },
   ],
 };
 
@@ -102,6 +101,9 @@ const routeStart = () => server.route([{
         id: Joi.string().required(),
       },
     },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
   },
   handler: require('./app/handlers/GET/user/id/'),
 }, {
@@ -111,6 +113,9 @@ const routeStart = () => server.route([{
     auth: 'default',
     description: 'Retrieve the User Projects',
     tags: ['user', 'project'],
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
   },
   handler: require('./app/handlers/GET/user/projects/'),
 }, {
@@ -124,6 +129,9 @@ const routeStart = () => server.route([{
       payload: {
         projectId: Joi.string().required(),
       },
+    },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
     },
   },
   handler: require('./app/handlers/PUT/user/projects/pinned/'),
@@ -139,6 +147,9 @@ const routeStart = () => server.route([{
         projectId: Joi.string().required(),
       },
     },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
   },
   handler: require('./app/handlers/PUT/user/projects/desPinned/'),
 }, {
@@ -152,6 +163,9 @@ const routeStart = () => server.route([{
       params: {
         id: Joi.string().required(),
       },
+    },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
     },
   },
   handler: require('./app/handlers/GET/user/projects/isPinned/'),
