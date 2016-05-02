@@ -1,18 +1,18 @@
 const Lab = require('lab');
 const lab = exports.lab = Lab.script();
+const Joi = require('joi');
 
 const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://127.0.0.1:27017/test';
 
 const expect = require('chai').expect;
-const get = require('ramda').prop;
-
 const describe = lab.describe;
 const it = lab.it;
 const before = lab.before;
 const after = lab.after;
 
 const User = require('../app/User/User.js');
+const UserModel = require('../app/User/UserModel');
 const server = require('../server.js');
 const users = require('./usersMock.js');
 
@@ -256,6 +256,15 @@ describe('User', () => {
           expect(result).to.be.equal('1234');
           done();
         });
+    });
+  });
+
+  describe('UserModel', () => {
+    it('Should validate the object with the UserModel defined', (done) => {
+      Joi.validate(users[0], UserModel, (err, user) => {
+        expect(!!user).to.eql(true);
+        done();
+      });
     });
   });
 });
