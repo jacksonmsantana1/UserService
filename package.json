@@ -2,7 +2,7 @@
   "name": "jackson.m.santana",
   "version": "1.0.0",
   "description": "First MicroService for the Patchwork project",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "npm run lint && lab -T node_modules/lab-babel -t 100 -v -l --coverage-exclude node_modules --coverage-exclude dist",
     "jscs": "jscs ./  --no-ignore ",
@@ -21,8 +21,7 @@
     "web",
     "application"
   ],
-  "author": "Jackson Martorano Sant'Ana",
-  "license": "MeuPau",
+  "author": "jackson.m.santana1",
   "bugs": {
     "url": "https://github.com/jacksonmsantana1/UserService/issues"
   },
@@ -35,7 +34,6 @@
   "dependencies": {
     "blipp": "^2.3.0",
     "boom": "^3.1.2",
-    "debug": "^2.2.0",
     "good": "^6.6.0",
     "good-console": "^5.3.2",
     "good-file": "^5.1.2",
@@ -49,9 +47,7 @@
     "lout": "^9.0.0",
     "mongodb": "^2.1.16",
     "ramda": "^0.20.1",
-    "request": "^2.69.0",
     "tv": "^5.0.2",
-    "uuid": "^2.0.1",
     "vision": "^4.1.0",
     "wreck": "^7.2.0"
   },
