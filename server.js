@@ -108,6 +108,23 @@ const routeStart = () => server.route([{
   handler: require('./app/handlers/GET/user/id/'),
 }, {
   method: 'GET',
+  path: '/user/{id}/isValid',
+  config: {
+    auth: 'default',
+    description: 'Checks if the user is valid',
+    tags: ['user', 'valid'],
+    validate: {
+      params: {
+        id: Joi.string().required(),
+      },
+    },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
+  },
+  handler: require('./app/handlers/GET/user/id/isValid/'),
+}, {
+  method: 'GET',
   path: '/user/projects',
   config: {
     auth: 'default',

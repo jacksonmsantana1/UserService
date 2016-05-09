@@ -84,9 +84,9 @@ describe('User', () => {
       database = db;
       userDB = database.collection('users');
 
-      User.saveUser(userDB, users[2])
-        .then((user) => {
-          console.log('=>=>=> Saved user: ' + user.id);
+      userDB.insert([users[2], users[6]])
+        .then((users) => {
+          console.log(users);
           console.log('\n/*************Starting Handlers Tests**************/\n');
           done();
         })
@@ -258,8 +258,155 @@ describe('User', () => {
     });
   });
 
-  describe('GET /user/projects', () => {
+  describe('GET /user/{id}/isValid', () => {
+    it('Should return an error if the request doesnt contain a token', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/invalidId/isValid',
+      };
 
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(JSON.parse(response.payload).message).to.be.equal('Token Required');
+        done();
+      });
+    });
+
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/1234567890/isValid',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error with the token has an invalid signature', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/1234567890/isValid',
+        headers: {
+          authorization: invalidTokenKey('1234567890'),
+        },
+      };
+      let strError = 'Invalid Token Signature';
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesnt have a signature', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/1234567890/isValid',
+        headers: {
+          authorization: withoutTokenSignature('1234567890'),
+        },
+      };
+      let strError = 'Token Signature is required';
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesnt contain the id value', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/ /isvalid',
+        headers: {
+          authorization: invalidTokenHeader('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(404);
+        done();
+      });
+    });
+
+    it('Should return an error if the token is expired', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/invalidId/isValid',
+        headers: {
+          authorization: expiredToken('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
+      });
+    });
+
+    it('Should return an error if the request is made by a not admin user', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/123456/isValid',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(403);
+        expect(JSON.parse(response.payload).message)
+          .to.be.equal('Normal User not allowed');
+        done();
+      });
+    });
+
+    it('Should return false if the user doesnt exists', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/invalidUser/isValid',
+        headers: {
+          authorization: tokenHeader('adminUser'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(200);
+        expect(response.result).to.be.equal(false);
+        done();
+      });
+    });
+
+    it('Should return true if the user exists', (done) => {
+      let options = {
+        method: 'GET',
+        url: '/user/12345/isValid',
+        headers: {
+          authorization: tokenHeader('adminUser'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        console.log(response.result);
+        expect(response.statusCode).to.be.equal(200);
+        expect(response.result).to.be.equal(true);
+        done();
+      });
+    });
+  });
+
+  describe('GET /user/projects', () => {
     it('Should be listening to this endpoint', (done) => {
       let options = {
         method: 'GET',
