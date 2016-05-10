@@ -1,31 +1,29 @@
-// This service will connect with the Projects  Microservice
-// MOCKING
-
 const Boom = require('boom');
+const Wreck = require('wreck');
+const ProjectUrl = 'http://localhost:8000/projects';
 
-//MOCK
+const _isValid = (id, options, fn) =>
+  Wreck.get(ProjectUrl + '/isValid/' + id, options, fn);
+
+const options = {
+  headers: {
+    authorization: require('../../../admin'),
+  },
+  json: true,
+};
+
 module.exports = {
-  getProject: (id) => {
-    if (id === '1234567890' || id === '12345') {
-      return Promise.resolve({
-        id: '' + id,
-        name: 'Patchwork Project 1',
-      });
-    } else if (id === '12345678') {
-      return Promise.resolve({
-        id: '' + id,
-        name: 'Patchwork Project 2',
-      });
-    }
+  isValid: (id) =>
+    new Promise((resolve, reject) =>
+      _isValid(id, options, (err, res, payload) => {
+        if (err) {
+          reject(Boom.badGateway(err.message));
+        }
 
-    return Promise.reject(Boom.badRequest('Project doesn t exist'));
-  },
-
-  isValid: (id) => {
-    if (id === 'DONT EXIST') {
-      return Promise.reject(Boom.badRequest('Project doesn t exist'));
-    }
-
-    return Promise.resolve(id);
-  },
+        if (!payload && res.statusCode === 200) {
+          reject(Boom.badRequest('Project doesn t exist'));
+        } else if (payload && res.statusCode === 200) {
+          resolve(id);
+        }
+      })),
 };

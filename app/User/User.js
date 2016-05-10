@@ -17,7 +17,7 @@ const _getUser = curry((db, uid) => new Promise((resolve, reject) => {
      if (!!doc && doc !== null) {
        resolve(doc);
      } else if (!doc && !error) {
-       reject(Boom.badRequest('Inexistent User'));
+       reject(Boom.unauthorized('Inexistent User'));
      }
 
      reject(Boom.badRequest('MongoDB Server Error'));
@@ -81,7 +81,7 @@ const _addPinnedProject = curry((db, userId, projectId) =>
       { $addToSet: { 'projects.pinned': projectId } })
       .then((writeResult) => {
         if (!writeResult.result.n) {
-          reject(Boom.badRequest('Inexistent User'));
+          reject(Boom.unauthorized('Inexistent User'));
         } else if (!writeResult.result.nModified && !!writeResult.result.n) {
           reject(Boom.badRequest('Project already pinned'));
         } else if (!!writeResult.result.nModified && !!writeResult.result.n) {
@@ -105,7 +105,7 @@ const _removePinnedProject = curry((db, userId, projectId) =>
       { $pull: { 'projects.pinned': projectId } })
       .then((writeResult) => {
         if (!writeResult.result.n) {
-          reject(Boom.badRequest('Inexistent User'));
+          reject(Boom.unauthorized('Inexistent User'));
         } else if (!writeResult.result.nModified && !!writeResult.result.n) {
           reject(Boom.badRequest('Project was already removed'));
         } else if (!!writeResult.result.nModified && !!writeResult.result.n) {

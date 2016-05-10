@@ -78,7 +78,7 @@ describe('User', () => {
     it('Should return an error if its an inexistent user', (done) => {
       User.getUser(userDB, '123456789')
         .catch((err) => {
-          expect(err.output.statusCode).to.be.equal(400);
+          expect(err.output.statusCode).to.be.equal(401);
           expect(err.message).to.be.equal('Inexistent User');
           done();
         });
@@ -189,7 +189,7 @@ describe('User', () => {
     it('Should return an error if its an inexistent user', (done) => {
       User.addPinnedProject(userDB, '123456789', '')
         .catch((err) => {
-          expect(err.output.statusCode).to.be.equal(400);
+          expect(err.output.statusCode).to.be.equal(401);
           expect(err.message).to.be.equal('Inexistent User');
           done();
         });
@@ -235,7 +235,7 @@ describe('User', () => {
     it('Should return an error if its an inexistent user', (done) => {
       User.removePinnedProject(userDB, '123456789', '')
         .catch((err) => {
-          expect(err.output.statusCode).to.be.equal(400);
+          expect(err.output.statusCode).to.be.equal(401);
           expect(err.message).to.be.equal('Inexistent User');
           done();
         });

@@ -1,6 +1,9 @@
 const Lab = require('lab');
 const lab = exports.lab = Lab.script();
+
 const expect = require('chai').expect;
+const sinon = require('sinon');
+
 const Jwt = require('jsonwebtoken');
 const privateKey = require('../privateKey.js');
 
@@ -9,6 +12,9 @@ const url = 'mongodb://127.0.0.1:27017/test';
 
 const User = require('../app/User/User.js');
 const users = require('./usersMock.js');
+
+const Project = require('../app/plugins/Project/index');
+const Wreck = require('wreck');
 
 const describe = lab.describe;
 const it = lab.it;
@@ -73,6 +79,7 @@ describe('User', () => {
 
   let userDB;
   let database;
+  let isValid;
 
   before((done) => {
     MongoClient.connect(url, (err, db) => {
@@ -231,7 +238,7 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(JSON.parse(response.payload).message).to.be.equal('Inexistent User');
         done();
       });
@@ -398,7 +405,6 @@ describe('User', () => {
       };
 
       server.inject(options, (response) => {
-        console.log(response.result);
         expect(response.statusCode).to.be.equal(200);
         expect(response.result).to.be.equal(true);
         done();
@@ -535,7 +541,7 @@ describe('User', () => {
       let strError = 'Inexistent User';
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal(strError);
         done();
       });
@@ -565,8 +571,11 @@ describe('User', () => {
   });
 
   describe('PUT /user/projects/pinned', () => {
-
     it('Should be listening this endpoint', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/pinned',
@@ -583,6 +592,7 @@ describe('User', () => {
 
         expect(res.method).to.be.equal('PUT');
         expect(res.url).to.be.equal('/user/projects/pinned');
+        stub.restore();
         done();
       });
     });
@@ -669,7 +679,11 @@ describe('User', () => {
       });
     });
 
-    it('Should return an error if token request doenst contain the id value', (done) => {
+    it('Should return an error if the user doesnt exist', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/pinned',
@@ -683,8 +697,9 @@ describe('User', () => {
       let strError = 'Inexistent User';
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal(strError);
+        stub.restore();
         done();
       });
     });
@@ -742,6 +757,10 @@ describe('User', () => {
     });
 
     it('Should return an error if the project is already pinned by the user', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/pinned',
@@ -756,11 +775,16 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
         expect(response.result.message).to.be.equal('Project already pinned');
+        stub.restore();
         done();
       });
     });
 
     it('Should return an error if the project don t exist', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, false);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/pinned',
@@ -775,11 +799,16 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
         expect(response.result.message).to.be.equal('Project doesn t exist');
+        stub.restore();
         done();
       });
     });
 
     it('Should update the user with the new pinned project', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/pinned',
@@ -795,6 +824,7 @@ describe('User', () => {
         expect(response.statusCode).to.be.equal(200);
         expect(!!response.headers.authorization).to.be.equal(true);
         expect(response.result).to.be.equal('123456');
+        stub.restore();
         done();
       });
     });
@@ -802,6 +832,10 @@ describe('User', () => {
 
   describe('PUT /user/projects/desPinned', () => {
     it('Should be listenning to this endpoint', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/desPinned',
@@ -815,9 +849,9 @@ describe('User', () => {
 
       server.inject(options, (response) => {
         let res = response.raw.req;
-
         expect(res.method).to.be.equal('PUT');
         expect(res.url).to.be.equal('/user/projects/desPinned');
+        stub.restore();
         done();
       });
     });
@@ -956,6 +990,10 @@ describe('User', () => {
     });
 
     it('Should return an error if the project don t exist', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, false);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/desPinned',
@@ -970,11 +1008,16 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
         expect(response.result.message).to.be.equal('Project doesn t exist');
+        stub.restore();
         done();
       });
     });
 
-    it('Should return an error if the user`s id doenst exists', (done) => {
+    it('Should return an error if the user doenst exists', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/desPinned',
@@ -988,13 +1031,18 @@ describe('User', () => {
       let strError = 'Inexistent User';
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal(strError);
+        stub.restore();
         done();
       });
     });
 
     it('Should return an error if the project isnt pinned', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/desPinned',
@@ -1010,11 +1058,16 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(400);
         expect(response.result.message).to.be.equal(strError);
+        stub.restore();
         done();
       });
     });
 
     it('Should return an authorization header after updating the user s content', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
       let options = {
         method: 'PUT',
         url: '/user/projects/desPinned',
@@ -1029,6 +1082,7 @@ describe('User', () => {
       server.inject(options, (response) => {
         expect(response.statusCode).to.be.equal(200);
         expect(!!response.headers.authorization).to.be.equal(true);
+        stub.restore();
         done();
       });
     });
@@ -1183,7 +1237,7 @@ describe('User', () => {
       let strError = 'Inexistent User';
 
       server.inject(options, (response) => {
-        expect(response.statusCode).to.be.equal(400);
+        expect(response.statusCode).to.be.equal(401);
         expect(response.result.message).to.be.equal(strError);
         done();
       });
