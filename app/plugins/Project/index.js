@@ -13,7 +13,7 @@ const options = {
 };
 
 module.exports = {
-  isValid: (id) =>
+  isProjectValid: (id) =>
     new Promise((resolve, reject) =>
       _isValid(id, options, (err, res, payload) => {
         if (err) {

@@ -9,7 +9,9 @@ server.connection({
 });
 
 server.auth.scheme('token', require('./app/plugins/auth/auth'));
+server.auth.scheme('admin', require('./app/plugins/auth/adminAuth'));
 server.auth.strategy('default', 'token');
+server.auth.strategy('admin', 'admin');
 
 const goodConfig = {
   reporters: [{
@@ -110,9 +112,9 @@ const routeStart = () => server.route([{
   method: 'GET',
   path: '/user/{id}/isValid',
   config: {
-    auth: 'default',
+    auth: 'admin',
     description: 'Checks if the user is valid',
-    tags: ['user', 'valid'],
+    tags: ['user', 'valid', 'admin'],
     validate: {
       params: {
         id: Joi.string().required(),
@@ -125,13 +127,30 @@ const routeStart = () => server.route([{
   handler: require('./app/handlers/GET/user/id/isValid/'),
 }, {
   method: 'GET',
+  path: '/user/{id}/isAdmin',
+  config: {
+    auth: 'admin',
+    description: 'Checks if the user is an admin',
+    tags: ['user', 'valid', 'admin'],
+    validate: {
+      params: {
+        id: Joi.string().required(),
+      },
+    },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
+  },
+  handler: require('./app/handlers/GET/user/id/isAdmin/'),
+}, {
+  method: 'GET',
   path: '/user/projects',
   config: {
     auth: 'default',
     description: 'Retrieve the User Projects',
     tags: ['user', 'project'],
     cors: {
-      origin: ['http://localhost:8080'], //FIXME Remove in production
+      origin: ['http://localhost:8080', 'http://localhost:8000'], //FIXME Remove in production
     },
   },
   handler: require('./app/handlers/GET/user/projects/'),

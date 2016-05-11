@@ -15,7 +15,7 @@ const isAuthenticated = (request) => {
 };
 
 // isProjectValid :: String:projectId -> Promise(String:projectId, Error)
-const isProjectValid = require('../../../../../plugins/Project/').isValid;
+const isProjectValid = require('../../../../../plugins/Project/').isProjectValid;
 
 // pinned :: Database -> String:credential -> String:projectId -> Promise(String, Error)
 const pinned = require('../../../../../User/User').addPinnedProject;
