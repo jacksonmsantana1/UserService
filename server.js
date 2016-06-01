@@ -173,6 +173,23 @@ const routeStart = () => server.route([{
   handler: require('./app/handlers/PUT/user/projects/pinned/'),
 }, {
   method: 'PUT',
+  path: '/user/projects/liked',
+  config: {
+    auth: 'default',
+    description: 'Add the project id to the user liked projects',
+    tags: ['project', 'liked'],
+    validate: {
+      payload: {
+        projectId: Joi.string().required(),
+      },
+    },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
+  },
+  handler: require('./app/handlers/PUT/user/projects/liked/'),
+}, {
+  method: 'PUT',
   path: '/user/projects/desPinned',
   config: {
     auth: 'default',

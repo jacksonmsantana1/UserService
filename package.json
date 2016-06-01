@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "npm run lint && lab -T node_modules/lab-babel -t 100 -v -l --coverage-exclude node_modules --coverage-exclude dist",
+    "tdd": "lab -T node_modules/lab-babel -t 100 -v -l --coverage-exclude node_modules --coverage-exclude dist",
     "jscs": "jscs ./  --no-ignore ",
     "eslint": "eslint ./ --ext .js",
     "lint": "npm run eslint && npm run jscs",

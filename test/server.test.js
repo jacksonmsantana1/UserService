@@ -1460,4 +1460,32 @@ describe('User', () => {
       });
     });
   });
+
+  describe('PUT /user/projects/liked', () => {
+    it('Should be listening to this endpoint', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/liked',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+        payload: {
+          projectId: '1234567890',
+        },
+      };
+
+      server.inject(options, (response) => {
+        let res = response.raw.req;
+
+        expect(res.method).to.be.equal('PUT');
+        expect(res.url).to.be.equal('/user/projects/liked');
+        stub.restore();
+        done();
+      });
+    });
+  });
 });
