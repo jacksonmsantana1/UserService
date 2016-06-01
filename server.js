@@ -160,7 +160,7 @@ const routeStart = () => server.route([{
   config: {
     auth: 'default',
     description: 'Add the Project ID to the User Projects object(projects.pinned)',
-    tags: ['project', 'pinned'],
+    tags: ['project', 'pins', 'pinned'],
     validate: {
       payload: {
         projectId: Joi.string().required(),
@@ -177,7 +177,7 @@ const routeStart = () => server.route([{
   config: {
     auth: 'default',
     description: 'Add the project id to the user liked projects',
-    tags: ['project', 'liked'],
+    tags: ['project', 'likes', 'liked'],
     validate: {
       payload: {
         projectId: Joi.string().required(),
@@ -194,7 +194,7 @@ const routeStart = () => server.route([{
   config: {
     auth: 'default',
     description: 'Remove the Project ID from the User Projects object(projects.pinned)',
-    tags: ['project', 'desPinned'],
+    tags: ['project', 'pins', 'desPinned'],
     validate: {
       payload: {
         projectId: Joi.string().required(),
@@ -206,12 +206,29 @@ const routeStart = () => server.route([{
   },
   handler: require('./app/handlers/PUT/user/projects/desPinned/'),
 }, {
+  method: 'PUT',
+  path: '/user/projects/disLiked',
+  config: {
+    auth: 'default',
+    description: 'Remove the Project ID from the User Projects object(projects.liked)',
+    tags: ['project', 'likes', 'disLiked'],
+    validate: {
+      payload: {
+        projectId: Joi.string().required(),
+      },
+    },
+    cors: {
+      origin: ['http://localhost:8080'], //FIXME Remove in production
+    },
+  },
+  handler: require('./app/handlers/PUT/user/projects/disLiked/'),
+}, {
   method: 'GET',
   path: '/user/projects/isPinned/{id}',
   config: {
     auth: 'default',
     description: 'Tells if the User have already pinned the Project',
-    tags: ['project', 'pinned'],
+    tags: ['project', 'pins', 'pinned'],
     validate: {
       params: {
         id: Joi.string().required(),

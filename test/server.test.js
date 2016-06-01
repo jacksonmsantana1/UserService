@@ -1720,4 +1720,262 @@ describe('User', () => {
       });
     });
   });
+
+  describe('PUT /user/projects/disliked', () => {
+    it('Should be listenning to this endpoint', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('User'),
+        },
+        payload: {
+          projectId: '1234567890',
+        },
+      };
+
+      server.inject(options, (response) => {
+        let res = response.raw.req;
+        expect(res.method).to.be.equal('PUT');
+        expect(res.url).to.be.equal('/user/projects/disLiked');
+        stub.restore();
+        done();
+      });
+    });
+
+    it('Should return an error if the request doesnt contain a token', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal('Token Required');
+        done();
+      });
+    });
+
+    it('Should return an error with the authorization header is incomplete', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: invalidTokenBearer('1234567890'),
+        },
+      };
+      let strError = 'Bearer Required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if token has an invalid signature', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: invalidTokenKey('12345'),
+        },
+      };
+      let strError = 'Invalid Token Signature';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesnt have a signature', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: withoutTokenSignature('1234567890'),
+        },
+      };
+      let strError = 'Token Signature is required';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        done();
+      });
+    });
+
+    it('Should return an error if the token doesn t contain the id value', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: invalidTokenHeader('12345'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(JSON.parse(response.payload).message)
+          .to.be.equal('Token ID required');
+        done();
+      });
+    });
+
+    it('Should contain in the request the Project s ID', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+        payload: {},
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('child "projectId" fails because [projectId is required]');
+        done();
+      });
+    });
+
+    it('Should contain a not empty payload', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('1234567890'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('"value" must be an object');
+        done();
+      });
+    });
+
+    it('Should return an error if the token is expired', (done) => {
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: expiredToken('123456789'),
+        },
+      };
+
+      server.inject(options, (response) => {
+        setTimeout(() => {
+          expect(response.statusCode).to.be.equal(401);
+          expect(JSON.parse(response.payload).message)
+            .to.be.equal('Token Expired');
+          done();
+        }, 20);
+      });
+    });
+
+    it('Should return an error if the project don t exist', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, false);
+      });
+
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+        payload: {
+          projectId: 'DONT EXIST',
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal('Project doesn t exist');
+        stub.restore();
+        done();
+      });
+    });
+
+    it('Should return an error if the user doenst exists', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('123456789'),
+        },
+        payload: {
+          projectId: '12345',
+        },
+      };
+      let strError = 'Inexistent User';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(401);
+        expect(response.result.message).to.be.equal(strError);
+        stub.restore();
+        done();
+      });
+    });
+
+    it('Should return an error if the project isnt liked', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+        payload: {
+          projectId: 'ANUS',
+        },
+      };
+      let strError = 'Project was already removed';
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(400);
+        expect(response.result.message).to.be.equal(strError);
+        stub.restore();
+        done();
+      });
+    });
+
+    it('Should return an authorization header after updating the user s content', (done) => {
+      const stub = sinon.stub(Wreck, 'get', (uri, options, cb) => {
+        return cb(null, { statusCode: 200 }, true);
+      });
+
+      let options = {
+        method: 'PUT',
+        url: '/user/projects/disLiked',
+        headers: {
+          authorization: tokenHeader('12345'),
+        },
+        payload: {
+          projectId: 'test',
+        },
+      };
+
+      server.inject(options, (response) => {
+        expect(response.statusCode).to.be.equal(200);
+        expect(!!response.headers.authorization).to.be.equal(true);
+        stub.restore();
+        done();
+      });
+    });
+  });
 });
