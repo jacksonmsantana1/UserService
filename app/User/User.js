@@ -92,6 +92,30 @@ const _addPinnedProject = curry((db, userId, projectId) =>
       });
   }));
 
+const _addLikedProject = curry((db, userId, projectId) =>
+  new Promise((resolve, reject) => {
+    if (db.collectionName !== 'users') {
+      reject(Boom.badImplementation(
+        'Trying to access an invalid collection: ' + db.collectionName));
+    } else if (!userId) {
+      reject(Boom.badRequest('Invalid ID'));
+    }
+
+    db.update({ id: userId },
+      { $addToSet: { 'projects.liked': projectId } })
+      .then((writeResult) => {
+        if (!writeResult.result.n) {
+          reject(Boom.unauthorized('Inexistent User'));
+        } else if (!writeResult.result.nModified && !!writeResult.result.n) {
+          reject(Boom.badRequest('Project already liked'));
+        } else if (!!writeResult.result.nModified && !!writeResult.result.n) {
+          resolve(projectId);
+        } else if (!writeResult.ok) {
+          reject(Boom.badImplementation('MongoDB Server Error'));
+        }
+      });
+  }));
+
 const _removePinnedProject = curry((db, userId, projectId) =>
   new Promise((resolve, reject) => {
     if (db.collectionName !== 'users') {
@@ -122,4 +146,5 @@ module.exports = {
   replaceUser: _replaceUser,
   addPinnedProject: _addPinnedProject,
   removePinnedProject: _removePinnedProject,
+  addLikedProject: _addLikedProject,
 };

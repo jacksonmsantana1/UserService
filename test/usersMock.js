@@ -31,7 +31,7 @@ module.exports = [{
   password: 'SAVED',
   projects: {
     pinned: ['12345'],
-    liked: [],
+    liked: ['12345'],
     doneProjects: [],
     inProgressProjects: [],
   },
